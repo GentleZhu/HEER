@@ -15,14 +15,14 @@ class SkipGram(object):
 	"""pytorch implementation for SkipGram"""
 	def __init__(self, arg):
 		super(SkipGram, self).__init__()
-		type_offset = cPickle.load(open('/shared/data/qiz3/data/sample_offset.p'))
+		type_offset = cPickle.load(open('/shared/data/qiz3/data/offset.p'))
 		self.neg_loss = neg.NEG_loss(type_offset=type_offset, types=['a', 'p', 'w', 'v', 'y', 'cp'],embed_size=arg['emb_size'])
 		self.SGD = optim.SGD(self.neg_loss.parameters(), lr = 0.025)
 		#self.walks = arg['walks']
 		#self.input = cPickle.load(open('/shared/data/qiz3/data/input.p'))
 		#self.output = cPickle.load(open('/shared/data/qiz3/data/output.p'))
-		self.input = tdata.TensorDataset(t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/sample_input.p'))), 
-			t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/sample_output.p'))))
+		self.input = tdata.TensorDataset(t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/input.p'))), 
+			t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/output.p'))))
 		#self.output = utils.data.TensorDataset(cPickle.load(open('/shared/data/qiz3/data/output.p')))
 		self.window_size = arg['window_size']
 		self.data = tdata.DataLoader(self.input, 50)
@@ -39,10 +39,13 @@ class SkipGram(object):
 				inputs, labels = data
 				loss = self.neg_loss(inputs, labels, self.neg_ratio)
 				loss_sum += loss
+				if i % 100000 == 1:
+					print(epoch,i,loss_sum / i)
 				#print(loss)
 				self.SGD.zero_grad()
 				loss.backward()
 				self.SGD.step()
+			t.save(self.neg_loss, '/shared/data/qiz3/data/model/'+str(epoch)+'.pt')
 			print(epoch, loss_sum)
 
 	def output(self):

@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 from emb_lib import SkipGram
 from collections import defaultdict
+import torch
 import cPickle
 
 def parse_args():
@@ -12,6 +13,9 @@ def parse_args():
 
 	parser.add_argument('--input', nargs='?', default='graph/karate.edgelist',
 	                    help='Input graph path')
+
+	parser.add_argument('--gpu', nargs='?', default='0',
+	                    help='Embeddings path')
 
 	parser.add_argument('--output', nargs='?', default='emb/karate.emb',
 	                    help='Embeddings path')
@@ -28,7 +32,7 @@ def parse_args():
 	parser.add_argument('--window-size', type=int, default=10,
                     	help='Context size for optimization. Default is 10.')
 
-	parser.add_argument('--iter', default=20, type=int,
+	parser.add_argument('--iter', default=10, type=int,
                       help='Number of epochs in SGD')
 
 	parser.add_argument('--workers', type=int, default=8,
@@ -162,7 +166,7 @@ def main(args):
 	#tmp = HinLoader({'graph': args.input, 'types':['a', 'p', 'w', 'v', 'y', 'cp']})
 	#tmp.readHin()
 	#tmp.encode()
-	#tmp.dump('/shared/data/qiz3/data/sample_')
+	#tmp.dump('/shared/data/qiz3/data/')
 	#G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
 	#G.preprocess_transition_probs()
 	#walks = G.simulate_walks(args.num_walks, args.walk_length)
@@ -171,5 +175,6 @@ def main(args):
 if __name__ == "__main__":
 	args = parse_args()
 	#read_hin(args.input)
+	torch.cuda.set_device(int(args.gpu))
 	main(args)
 	#nx_G = read_graph()
