@@ -25,8 +25,7 @@ class SkipGram(object):
 			t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/output.p'))))
 		#self.output = utils.data.TensorDataset(cPickle.load(open('/shared/data/qiz3/data/output.p')))
 		self.window_size = arg['window_size']
-		self.data = tdata.DataLoader(self.input, 50)
-		#self.walk_length = len(self.walks[0])
+		self.data = tdata.DataLoader(self.input, arg['batch_size'])
 		self.iter = arg['iter']
 		self.neg_ratio = arg['neg_ratio']
 		
