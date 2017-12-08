@@ -2,6 +2,10 @@ import neg
 import torch.optim as optim
 import torch as t
 import numpy as np
+import torch.utils.data as tdata
+import cPickle
+
+#dict(, nn.Embedding)
 
 # support heterogenous node type
 # first consider about first order proximity
@@ -11,29 +15,35 @@ class SkipGram(object):
 	"""pytorch implementation for SkipGram"""
 	def __init__(self, arg):
 		super(SkipGram, self).__init__()
-		self.neg_loss = neg.NEG_loss(num_classes=arg['num_nodes'], embed_size=arg['emb_size'])
+		type_offset = cPickle.load(open('/shared/data/qiz3/data/sample_offset.p'))
+		self.neg_loss = neg.NEG_loss(type_offset=type_offset, types=['a', 'p', 'w', 'v', 'y', 'cp'],embed_size=arg['emb_size'])
 		self.SGD = optim.SGD(self.neg_loss.parameters(), lr = 0.025)
-		self.walks = arg['walks']
+		#self.walks = arg['walks']
+		#self.input = cPickle.load(open('/shared/data/qiz3/data/input.p'))
+		#self.output = cPickle.load(open('/shared/data/qiz3/data/output.p'))
+		self.input = tdata.TensorDataset(t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/sample_input.p'))), 
+			t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/sample_output.p'))))
+		#self.output = utils.data.TensorDataset(cPickle.load(open('/shared/data/qiz3/data/output.p')))
 		self.window_size = arg['window_size']
-		self.walk_length = len(self.walks[0])
+		self.data = tdata.DataLoader(self.input, 50)
+		#self.walk_length = len(self.walks[0])
 		self.iter = arg['iter']
 		self.neg_ratio = arg['neg_ratio']
-		print self.walk_length
+		
 		
 	def train(self):
-		for iter in xrange(self.iter):
-			np.random.shuffle(self.walks)
-			for i,walk in enumerate(self.walks):
-				train_input_batch = np.array([walk[j] for j in xrange(self.walk_length - self.window_size)])
-				train_ctx_batch = np.array([walk[j+1:j+1+self.window_size] for j in xrange(self.walk_length-self.window_size)])
-				loss = self.neg_loss(t.from_numpy(train_input_batch),\
-					t.from_numpy(train_ctx_batch), self.neg_ratio)
-				batches = iter*len(self.walks)+i
-				if batches % 100 == 0:
-					print "iter:",iter," loss:",loss," batches:",batches
+		#return
+		for epoch in xrange(self.iter):
+			loss_sum = 0
+			for i, data in enumerate(self.data, 0):
+				inputs, labels = data
+				loss = self.neg_loss(inputs, labels, self.neg_ratio)
+				loss_sum += loss
+				#print(loss)
 				self.SGD.zero_grad()
 				loss.backward()
 				self.SGD.step()
+			print(epoch, loss_sum)
 
 	def output(self):
-		word_embeddings = self.neg_loss.input_embeddings() 
+		word_embeddings = self.neg_loss.input_embeddings()

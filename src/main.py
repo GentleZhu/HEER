@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 from emb_lib import SkipGram
 from collections import defaultdict
+import cPickle
 
 def parse_args():
 	'''
@@ -27,7 +28,7 @@ def parse_args():
 	parser.add_argument('--window-size', type=int, default=10,
                     	help='Context size for optimization. Default is 10.')
 
-	parser.add_argument('--iter', default=1, type=int,
+	parser.add_argument('--iter', default=20, type=int,
                       help='Number of epochs in SGD')
 
 	parser.add_argument('--workers', type=int, default=8,
@@ -50,6 +51,63 @@ def parse_args():
 	parser.set_defaults(directed=False)
 
 	return parser.parse_args()
+
+class HinLoader(object):
+	"""docstring for HinLoader"""
+	def __init__(self, arg):
+		self.in_mapping = dict()
+		self.out_mapping = dict()
+		self.input = list()
+		self.output = list()
+		self.arg = arg
+		for k in arg['types']:
+			self.in_mapping[k] = dict()
+			self.out_mapping[k] = dict()
+		print(self.in_mapping.keys())
+		print(self.out_mapping.keys())
+
+	def inNodeMapping(self, key, type):
+		if key not in self.in_mapping[type]:
+			self.out_mapping[type][len(self.in_mapping[type])] = key
+			self.in_mapping[type][key] = len(self.in_mapping[type])
+
+		return self.in_mapping[type][key]
+
+	def readHin(self):
+		#num_nodes = defaultdict(int)
+		with open(self.arg['graph']) as INPUT:
+			for line in INPUT:
+				edge = line.strip().split(' ')
+				node_a = edge[0].split(':')
+				node_b = edge[1].split(':')
+				self.input.append([self.arg['types'].index(node_a[0]), self.inNodeMapping(node_a[1], node_a[0])])
+				self.output.append([self.arg['types'].index(node_b[0]), self.inNodeMapping(node_b[1], node_b[0])])
+				#self.input.append([self.arg['types'].index(node_a[0]), self.arg['types'].index(node_b[0]), self.inNodeMapping(node_a[1], node_a[0]), self.inNodeMapping(node_b[1], node_b[0])])
+				#self.graph[(node_a[0], node_b[0])].append((self.inNodeMapping(node_a[1], node_a[0]), self.inNodeMapping(node_b[1], node_b[0])))
+		#print(map(lambda x:len(x), self.in_mapping))
+	
+	def encode(self):
+		self.encoder = dict()
+		offset = 0
+		for k in self.in_mapping:
+			self.encoder[k] = offset
+			offset += len(self.in_mapping[k])
+		self.encoder['sum'] = offset
+		print(self.encoder)
+		for i,ie in enumerate(self.input):
+			self.input[i][1] += self.encoder[self.arg['types'][ie[0]]]
+		for i,ie in enumerate(self.output):
+			self.output[i][1] += self.encoder[self.arg['types'][ie[0]]]
+			
+
+	def dump(self, dump_path):
+		cPickle.dump(self.encoder, open(dump_path + 'offset.p', 'wb'))
+		cPickle.dump(self.input, open(dump_path + 'input.p', 'wb'))
+		cPickle.dump(self.output, open(dump_path + 'output.p', 'wb'))
+		cPickle.dump(self.in_mapping, open(dump_path + 'in_mapping.p', 'wb'))
+		cPickle.dump(self.out_mapping, open(dump_path + 'out_mapping.p', 'wb'))
+
+		
 
 def read_hin(graph_name):
 	graph = defaultdict(list)
@@ -83,14 +141,14 @@ def read_graph():
 
 	return G
 
-def learn_embeddings(walks, num_nodes):
+def learn_embeddings():
 	'''
 	Learn embeddings by optimizing the Skipgram objective using SGD.
 	'''
-	walks = [map(lambda x: x-1, walk) for walk in walks]
+	#walks = [map(lambda x: x-1, walk) for walk in walks]
 	#model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
 	#print model
-	model = SkipGram({'walks':walks, 'emb_size':args.dimensions, 'num_nodes':num_nodes,\
+	model = SkipGram({'emb_size':args.dimensions, \
 		'window_size':args.window_size, 'iter':args.iter, 'neg_ratio':5})
 	model.train()
 	#model.save_word2vec_format(args.output)
@@ -101,11 +159,14 @@ def main(args):
 	'''
 	Pipeline for representational learning for all nodes in a graph.
 	'''
-	G,N = read_hin(args.input)
+	#tmp = HinLoader({'graph': args.input, 'types':['a', 'p', 'w', 'v', 'y', 'cp']})
+	#tmp.readHin()
+	#tmp.encode()
+	#tmp.dump('/shared/data/qiz3/data/sample_')
 	#G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
 	#G.preprocess_transition_probs()
 	#walks = G.simulate_walks(args.num_walks, args.walk_length)
-	learn_embeddings(G[('p', 'cp')], max(N['p'], N['cp']))
+	learn_embeddings()
 
 if __name__ == "__main__":
 	args = parse_args()

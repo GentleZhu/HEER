@@ -6,7 +6,7 @@ import numpy as np
 
 
 class NEG_loss(nn.Module):
-    def __init__(self, num_classes, embed_size, weights=None):
+    def __init__(self, type_offset, types, embed_size, weights=None):
         """
         :param num_classes: An int. The number of possible classes.
         :param embed_size: An int. EmbeddingLockup size
@@ -18,15 +18,25 @@ class NEG_loss(nn.Module):
 
         super(NEG_loss, self).__init__()
 
-        self.num_classes = num_classes
+        self.num_classes = type_offset['sum']
         self.embed_size = embed_size
+        self.in_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
 
+        self.edge_mapping = nn.ModuleList()
         #self.out_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
         #self.out_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1))
-
-        self.in_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
+        # nn.ModuleList
+            #self.in_embed[k].weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
+        #self.in_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
         #a kind of Variable that is to be considered as module parameter
         self.in_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
+        self.type_offset = []
+        for tp in types:
+            self.type_offset.append(type_offset[tp])
+            self.edge_mapping.append(nn.Linear(self.embed_size, self.embed_size).cuda())
+            self.edge_mapping[-1].weight = Parameter(t.FloatTensor(self.embed_size, self.embed_size).uniform_(-1, 1).cuda())
+        self.type_offset.append(type_offset['sum'])
+        #print(self.type_offset)
 
         self.weights = weights
         if self.weights is not None:
@@ -50,43 +60,69 @@ class NEG_loss(nn.Module):
             papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf
         """
 
-        use_cuda = self.in_embed.weight.is_cuda
+        #use_cuda = self.in_embed.weight.is_cuda
 
+        # use mask
+        use_cuda = True
+        loss_sum = 0.0
+
+        types = input_labels[:,0].numpy()
         [batch_size, window_size] = out_labels.size()
+        window_size -= 1
+        #print(window_size)
+        #print(out_labels)
+        #print(len(types))
+        #map(lambda x: x)
+        #hard encode 4 edge types
+        for tp in xrange(len(self.type_offset)-1):
+            #print(input_labels[t.LongTensor(np.where(types == t)),1])
+            indices = np.where(types == tp)[0]
+            if len(indices) == 0:
+                continue
+            sub_batch_size = len(indices)
+            tp_index = t.LongTensor(indices)
+            input_tensor = t.index_select(input_labels[:,1], 0, tp_index).repeat(1, window_size).contiguous().view(-1)
+            #print(t.index_select(out_labels, 0, tp_index)[:,1:])
+            output_tensor = t.index_select(out_labels[:,1:], 0, tp_index).contiguous().view(-1)
+            
+        #input_tensor = input_labels.repeat(1, window_size).contiguous().view(-1)
+        
+        #output_tensor = out_labels[:,1:].contiguous().view(-1)
 
-        input_tensor = input_labels.repeat(1, window_size).contiguous().view(-1)
-        output_tensor = out_labels.contiguous().view(-1)
+            if use_cuda:
+                input_tensor = input_tensor.cuda()
+                output_tensor = output_tensor.cuda()
 
-        if use_cuda:
-            input_tensor = input_tensor.cuda()
-            output_tensor = output_tensor.cuda()
+            input = self.in_embed(Variable(input_tensor))
+            output = self.in_embed(Variable(output_tensor))
 
-        input = self.in_embed(Variable(input_tensor))
-        output = self.in_embed(Variable(output_tensor))
+            if self.weights is not None:
+                noise_sample_count = sub_batch_size * window_size * num_sampled
+                draw = self.sample(noise_sample_count)
+                noise = draw.view(sub_batch_size * window_size, num_sampled)
+            else:
+                noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
+                                 uniform_(0, self.type_offset[tp+1] - self.type_offset[tp] - 1).add_(self.type_offset[tp]).long())
 
-        if self.weights is not None:
-            noise_sample_count = batch_size * window_size * num_sampled
-            draw = self.sample(noise_sample_count)
-            noise = draw.view(batch_size * window_size, num_sampled)
-        else:
-            noise = Variable(t.Tensor(batch_size * window_size, num_sampled).
-                             uniform_(0, self.num_classes - 1).long())
+            if use_cuda:
+                noise = noise.cuda()
 
-        if use_cuda:
-            noise = noise.cuda()
-        noise = self.in_embed(noise).neg()
+            noise = self.in_embed(noise).neg()
 
-        log_target = (input * output).sum(1).squeeze().sigmoid().log()
+            
+            log_target = self.edge_mapping[tp](input * output).sum(1).squeeze().sigmoid().log()
 
-        '''[batch_size * window_size, num_sampled, embed_size] * [batch_size * window_size, embed_size, 1] ->
-            [batch_size, num_sampled, 1] -> [batch_size] '''
+            '''[batch_size * window_size, num_sampled, embed_size] * [batch_size * window_size, embed_size, 1] ->
+                [batch_size, num_sampled, 1] -> [batch_size] '''
 
-        #squeeze replace size 1
-        sum_log_sampled = t.bmm(noise, input.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
+            #squeeze replace size 1
+            
+            sum_log_sampled = (noise*input.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size).sum(1).squeeze().sigmoid().log()
+            #sum_log_sampled = t.bmm(noise, input.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
 
-        loss = log_target + sum_log_sampled
-
-        return -loss.sum() / batch_size
+            loss = log_target.sum() + sum_log_sampled.sum()
+            loss_sum -= loss
+        return loss_sum / batch_size
 
     def input_embeddings(self):
         return self.in_embed.weight.data.cpu().numpy()
