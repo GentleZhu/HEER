@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn import Parameter
 import numpy as np
+import utils
 
 
 class NEG_loss(nn.Module):
@@ -33,9 +34,11 @@ class NEG_loss(nn.Module):
         self.type_offset = []
         for tp in types:
             self.type_offset.append(type_offset[tp])
-            self.edge_mapping.append(nn.Linear(self.embed_size, self.embed_size).cuda())
-            self.edge_mapping[-1].weight = Parameter(t.FloatTensor(self.embed_size, self.embed_size).uniform_(-1, 1).cuda())
+            #self.edge_mapping.append(nn.Linear(self.embed_size, self.embed_size).cuda())
+            self.edge_mapping.append(utils.DiagLinear(self.embed_size).cuda())
+            self.edge_mapping[-1].weight = Parameter(t.FloatTensor(self.embed_size).uniform_(-1, 1).cuda())
         self.type_offset.append(type_offset['sum'])
+        print(self.type_offset)
         #print(self.type_offset)
 
         self.weights = weights
@@ -74,6 +77,7 @@ class NEG_loss(nn.Module):
         #print(len(types))
         #map(lambda x: x)
         #hard encode 4 edge types
+        
         for tp in xrange(len(self.type_offset)-1):
             #print(input_labels[t.LongTensor(np.where(types == t)),1])
             indices = np.where(types == tp)[0]
@@ -103,11 +107,15 @@ class NEG_loss(nn.Module):
             else:
                 noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
                                  uniform_(0, self.type_offset[tp+1] - self.type_offset[tp] - 1).add_(self.type_offset[tp]).long())
+                cp_noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
+                                 uniform_(0, self.type_offset[-1] - self.type_offset[-2] - 1).add_(self.type_offset[-2]).long())
 
             if use_cuda:
                 noise = noise.cuda()
+                cp_noise = cp_noise.cuda()
 
             noise = self.in_embed(noise).neg()
+            cp_noise = self.in_embed(cp_noise).neg()
 
             
             log_target = self.edge_mapping[tp](input * output).sum(1).squeeze().sigmoid().log()
@@ -117,10 +125,11 @@ class NEG_loss(nn.Module):
 
             #squeeze replace size 1
             
-            sum_log_sampled = (noise*input.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size).sum(1).squeeze().sigmoid().log()
-            #sum_log_sampled = t.bmm(noise, input.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
+            sum_log_sampled_u = self.edge_mapping[tp]( (noise*output.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
+            sum_log_sampled_v = self.edge_mapping[-1]( (cp_noise*input.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
+            #sum_log_sampled_v = t.bmm(noise, input.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
 
-            loss = log_target.sum() + sum_log_sampled.sum()
+            loss = 2 * log_target.sum() + sum_log_sampled_u.sum() + sum_log_sampled_v.sum()
             loss_sum -= loss
         return loss_sum / batch_size
 
