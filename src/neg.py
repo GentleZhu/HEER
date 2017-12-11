@@ -126,7 +126,7 @@ class NEG_loss(nn.Module):
             #squeeze replace size 1
             
             sum_log_sampled_u = self.edge_mapping[tp]( (noise*output.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
-            sum_log_sampled_v = self.edge_mapping[-1]( (cp_noise*input.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
+            sum_log_sampled_v = self.edge_mapping[tp]( (cp_noise*input.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
             #sum_log_sampled_v = t.bmm(noise, input.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
 
             loss = 2 * log_target.sum() + sum_log_sampled_u.sum() + sum_log_sampled_v.sum()
