@@ -27,26 +27,14 @@ def parse_args():
 	parser.add_argument('--batch-size', type=int, default=50,
 	                    help='Batch size. Default is 50.')
 
-	parser.add_argument('--walk-length', type=int, default=80,
-	                    help='Length of walk per source. Default is 80.')
-
-	parser.add_argument('--num-walks', type=int, default=10,
-	                    help='Number of walks per source. Default is 10.')
-
 	parser.add_argument('--window-size', type=int, default=10,
                     	help='Context size for optimization. Default is 10.')
 
-	parser.add_argument('--iter', default=10, type=int,
+	parser.add_argument('--initialization', type=str, default='',
+                    	help='embedding initialization')
+
+	parser.add_argument('--iter', default=500, type=int,
                       help='Number of epochs in SGD')
-
-	parser.add_argument('--workers', type=int, default=8,
-	                    help='Number of parallel workers. Default is 8.')
-
-	parser.add_argument('--p', type=float, default=1,
-	                    help='Return hyperparameter. Default is 1.')
-
-	parser.add_argument('--q', type=float, default=1,
-	                    help='Inout hyperparameter. Default is 1.')
 
 	parser.add_argument('--weighted', dest='weighted', action='store_true',
 	                    help='Boolean specifying (un)weighted. Default is unweighted.')
@@ -69,7 +57,7 @@ def learn_embeddings():
 	#model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
 	#print model
 	model = SkipGram({'emb_size':args.dimensions, \
-		'window_size':args.window_size, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':2})
+		'window_size':args.window_size, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':5})
 	model.train()
 	#model.save_word2vec_format(args.output)
 	

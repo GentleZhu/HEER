@@ -15,7 +15,8 @@ def decode(offset, out_mapping, address):
 			 
 
 if __name__ == '__main__':
-	model = t.load('/shared/data/qiz3/data/model/' + sys.argv[1] +'.pt')
+	t.cuda.set_device(int(sys.argv[2]))
+	model = t.load('/shared/data/qiz3/data/model/subtype_' + sys.argv[1] +'.pt')
 	emb = model.input_embeddings()
 	offset = cPickle.load(open('/shared/data/qiz3/data/offset.p'))
 	out_mapping = cPickle.load(open('/shared/data/qiz3/data/out_mapping.p'))
