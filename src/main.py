@@ -57,7 +57,8 @@ def learn_embeddings():
 	#model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
 	#print model
 	model = SkipGram({'emb_size':args.dimensions, \
-		'window_size':args.window_size, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':5})
+		'window_size':args.window_size, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':5, 
+		'pre_train':'/shared/data/qiz3/data/dim_100_attr_nodes_apvwy.emb'})
 	model.train()
 	#model.save_word2vec_format(args.output)
 	

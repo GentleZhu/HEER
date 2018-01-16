@@ -17,7 +17,7 @@ class SkipGram(object):
 	def __init__(self, arg):
 		super(SkipGram, self).__init__()
 		type_offset = cPickle.load(open('/shared/data/qiz3/data/offset.p'))
-		self.neg_loss = neg.NEG_loss(type_offset=type_offset, node_types=['a', 'p', 'w', 'v', 'y', 'cp'],edge_types=[(0,5), (1,5), (2,5), (3,5), (4,5)], embed_size=arg['emb_size'])
+		self.neg_loss = neg.NEG_loss(type_offset=type_offset, node_types=['a', 'p', 'w', 'v', 'y', 'cp'],edge_types=[(0,5), (1,5), (2,5), (3,5), (4,5)], embed_size=arg['emb_size'], pre_train_path=arg['pre_train'])
 		#self.neg_loss = neg.NEG_loss(num_classes=type_offset['sum'],embed_size=arg['emb_size'])
 		
 		self.SGD = optim.SGD(self.neg_loss.parameters(), lr = 0.25)
@@ -32,8 +32,9 @@ class SkipGram(object):
 		self.batch_size = arg['batch_size']
 		self.iter = arg['iter']
 		self.neg_ratio = arg['neg_ratio']
-		
-		
+		#if len(arg['pre_train']) > 0:
+		#	in_mapping = cPickle.load(open('/shared/data/qiz3/data/in_mapping.p'))	
+	
 	def train(self):
 		#return
 		for epoch in xrange(self.iter):
@@ -52,7 +53,7 @@ class SkipGram(object):
 				#	print(epoch,i,loss_sum / i)
 					#break
 			if epoch % 10 == 0:
-				t.save(self.neg_loss, '/shared/data/qiz3/data/model/subtype_'+str(epoch)+'.pt')
+				t.save(self.neg_loss, '/shared/data/qiz3/data/model/diag_'+str(epoch)+'.pt')
 			#if epoch % 20 == 0:
 			#print(num_batches)
 			print(epoch, loss_sum)
