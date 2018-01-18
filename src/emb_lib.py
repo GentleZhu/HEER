@@ -49,8 +49,8 @@ class SkipGram(object):
 				self.SGD.zero_grad()
 				loss.backward()
 				self.SGD.step()
-				for layer_i in len(loss.edge_mapping):
-					print(loss.edge_mapping[layer_i].weight.data)
+				for layer_i in len(self.neg_loss.edge_mapping):
+					print(self.neg_loss.edge_mapping[layer_i].weight.data)
 				#if i % 10000 == 9999:
 				#	print(epoch,i,loss_sum / i)
 					#break
