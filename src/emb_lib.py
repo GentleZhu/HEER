@@ -16,16 +16,16 @@ class SkipGram(object):
 	"""pytorch implementation for SkipGram"""
 	def __init__(self, arg):
 		super(SkipGram, self).__init__()
-		type_offset = cPickle.load(open('/shared/data/qiz3/data/offset.p'))
-		self.neg_loss = neg.NEG_loss(type_offset=type_offset, node_types=['a', 'p', 'w', 'v', 'y', 'cp'],edge_types=[(0,5), (1,5), (2,5), (3,5), (4,5)], embed_size=arg['emb_size'], pre_train_path=arg['pre_train'])
+		type_offset = cPickle.load(open('/shared/data/qiz3/data/' + arg['graph_name'] + 'offset.p'))
+		self.neg_loss = neg.NEG_loss(type_offset=type_offset, node_types=args['node_types'], edge_types=args['edge_types'], embed_size=arg['emb_size'], pre_train_path=arg['pre_train'])
 		#self.neg_loss = neg.NEG_loss(num_classes=type_offset['sum'],embed_size=arg['emb_size'])
 		
-		self.SGD = optim.SGD(self.neg_loss.parameters(), lr = 0.25)
+		self.SGD = optim.SGD(self.neg_loss.parameters(), lr = 0.025)
 		#self.walks = arg['walks']
 		#self.input = cPickle.load(open('/shared/data/qiz3/data/input.p'))
 		#self.output = cPickle.load(open('/shared/data/qiz3/data/output.p'))
-		self.input = tdata.TensorDataset(t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/input.p'))), 
-			t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/output.p'))))
+		self.input = tdata.TensorDataset(t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/' + arg['graph_name'] + 'input.p'))), 
+			t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/' + arg['graph_name'] + 'output.p'))))
 		#self.output = utils.data.TensorDataset(cPickle.load(open('/shared/data/qiz3/data/output.p')))
 		self.window_size = arg['window_size']
 		self.data = tdata.DataLoader(self.input, arg['batch_size'])
@@ -34,6 +34,11 @@ class SkipGram(object):
 		self.neg_ratio = arg['neg_ratio']
 		#if len(arg['pre_train']) > 0:
 		#	in_mapping = cPickle.load(open('/shared/data/qiz3/data/in_mapping.p'))	
+	
+	def get_params(self):
+		for name, param in self.neg_loss.named_parameters():
+			if 'embed' not in name:
+				yield param
 	
 	def train(self):
 		#return
@@ -49,12 +54,18 @@ class SkipGram(object):
 				self.SGD.zero_grad()
 				loss.backward()
 				self.SGD.step()
-				for layer_i in len(self.neg_loss.edge_mapping):
-					print(self.neg_loss.edge_mapping[layer_i].weight.data)
+				#print(self.neg_loss.parameters())
+				
+				#for param in self.neg_loss.parameters():
+				#	print(param)
+				t.nn.utils.clip_grad_norm(self.get_params(), 0.25)
+				#for layer_i in xrange(len(self.neg_loss.edge_mapping)):
+				#	print(self.neg_loss.edge_mapping[layer_i].weight.data)
+
 				#if i % 10000 == 9999:
 				#	print(epoch,i,loss_sum / i)
 					#break
-			if epoch % 10 == 0:
+			if epoch % 1 == 0:
 				t.save(self.neg_loss, '/shared/data/qiz3/data/model/diag_'+str(epoch)+'.pt')
 			#if epoch % 20 == 0:
 			#print(num_batches)

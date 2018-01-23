@@ -44,4 +44,5 @@ class SymmLinear(nn.Module):
 
     def forward(self, input):
         # See the autograd section for explanation of what happens here.
+        print(input.size(), self.weight.size())
         return input * (self.weight.transpose(0, 1) + self.weight)

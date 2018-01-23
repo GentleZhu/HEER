@@ -31,9 +31,12 @@ class NEG_loss(nn.Module):
 
         self.edge_mapping = nn.ModuleList()
         self.out_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
+
         self.out_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
         self.in_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
-        
+        #self.out_embed.weight.requires_grad = False
+        #self.in_embed.weight.requires_grad = False
+
         if len(pre_train_path) > 0:
             print(self.type_offset)
             in_mapping = cPickle.load(open('/shared/data/qiz3/data/in_mapping.p'))
@@ -142,6 +145,8 @@ class NEG_loss(nn.Module):
             #print(input.size())
             #print(output.size())
             #print(self.edge_mapping[tp].size())
+            
+            #log_target = self.edge_mapping[tp](input * output).sum(1).squeeze().sigmoid().log()
             log_target = self.edge_mapping[tp](input * output).sum(1).squeeze().sigmoid().log()
 
             '''[batch_size * window_size, num_sampled, embed_size] * [batch_size * window_size, embed_size, 1] ->
@@ -155,7 +160,7 @@ class NEG_loss(nn.Module):
             #sum_log_sampled_u = t.bmm(noise, output.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
             #sum_log_sampled_v = t.bmm(cp_noise, input.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
 
-            loss = 2 * log_target.sum() + sum_log_sampled_u.sum() + sum_log_sampled_v.sum()
+            loss = 2 * log_target.sum() + sum_log_sampled_u.sum() + sum_log_sampled_v.sum() #+ input.norm(p=2, dim=1, keepdim=True).sum() + output.norm(p=2, dim=1, keepdim=True).sum() + noise.norm(p=2, dim=1, keepdim=True).sum() + cp_noise.norm(p=2, dim=1, keepdim=True).sum() + self.edge_mapping[tp].weight.norm(p=2, keepdim=True).sum()
             #loss = log_target.sum() + sum_log_sampled_v.sum()
             #loss = log_target + sum_log_sampled_v
             #print(loss)
