@@ -47,8 +47,8 @@ if __name__ == '__main__':
         checksametype=False
         for line in f_in:
             line_split = line.split(' ')
-            #key1=line_split[0].lower()
-            #key2=line_split[1].lower()
+            key1=line_split[0] #.lower()
+            key2=line_split[1] #.lower()
             #print(key1[0],key2[0])
             if count==0: 
                 current=[]
