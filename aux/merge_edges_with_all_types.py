@@ -2,10 +2,10 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser(description="Read in input and output filenames.")
-parser.add_argument("--input-ref-file", nargs="+", help="Input query filename.", type=str)
-parser.add_argument("--input-score-dir", nargs="+", help="Directory for score files.", type=str)
-parser.add_argument("--input-score-keywords", nargs="+", help="Keyword contained by score files.", type=str)
-parser.add_argument("--output-file", nargs="+", help="Directory for output.", type=str)
+parser.add_argument("--input-ref-file", nargs="?", help="Input query filename.", type=str)
+parser.add_argument("--input-score-dir", nargs="?", help="Directory for score files.", type=str)
+parser.add_argument("--input-score-keywords", nargs="?", help="Keyword contained by score files.", type=str)
+parser.add_argument("--output-file", nargs="?", help="Directory for output.", type=str)
 args = parser.parse_args()
 
 input_ref_file = args.input_ref_file

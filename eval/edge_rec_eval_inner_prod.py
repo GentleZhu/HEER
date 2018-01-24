@@ -10,8 +10,8 @@ import sys
 import argparse
 
 parser = argparse.ArgumentParser(description="Read in input and output filenames.")
-parser.add_argument("--eval-file", nargs="+", help="Input evaluation filename.", type=str)
-parser.add_argument("--emb-file", nargs="+", help="Input embedding filename.", type=str)
+parser.add_argument("--eval-file", nargs="?", help="Input evaluation filename.", type=str)
+parser.add_argument("--emb-file", nargs="?", help="Input embedding filename.", type=str)
 args = parser.parse_args()
 
 input_embedding=args.emb_file

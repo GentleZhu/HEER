@@ -11,8 +11,8 @@ import time
 import argparse
 
 parser = argparse.ArgumentParser(description="Read in input and output filenames.")
-parser.add_argument("--eval-file", nargs="+", help="Input score filename.", type=str)
-parser.add_argument("--score-file", nargs="+", help="Input embedding filename.", type=str)
+parser.add_argument("--eval-file", nargs="?", help="Input score filename.", type=str)
+parser.add_argument("--score-file", nargs="?", help="Input embedding filename.", type=str)
 args = parser.parse_args()
 
 input_scorefile=args.score_file

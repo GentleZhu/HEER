@@ -2,8 +2,8 @@ import os
 import argparse
 
 parser = argparse.ArgumentParser(description="Read in input and output filenames.")
-parser.add_argument("--input-file", nargs="+", help="Input query filename.", type=str)
-parser.add_argument("--output-dir", nargs="+", help="Directory for output.", type=str)
+parser.add_argument("--input-file", nargs="?", help="Input query filename.", type=str)
+parser.add_argument("--output-dir", nargs="?", help="Directory for output.", type=str)
 args = parser.parse_args()
 
 input_file = args.input_file
