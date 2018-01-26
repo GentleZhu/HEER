@@ -8,7 +8,7 @@ import utils
 
 
 class NEG_loss(nn.Module):
-    def __init__(self, type_offset, node_types, edge_types, embed_size, pre_train_path, graph_name = '', mode=1, weight_decay=1.0):
+    def __init__(self, type_offset, node_types, edge_types, embed_size, pre_train_path, graph_name = '', weights=None):
         """
         :param num_classes: An int. The number of possible classes.
         :param embed_size: An int. EmbeddingLockup size
@@ -22,8 +22,6 @@ class NEG_loss(nn.Module):
 
         self.num_classes = type_offset['sum']
         self.type_offset = []
-        self.mode = mode
-        self.weight_decay = weight_decay
         for tp in node_types:
             self.type_offset.append(type_offset[tp])
 
@@ -36,47 +34,58 @@ class NEG_loss(nn.Module):
 
         self.out_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
         self.in_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
+        #self.out_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1))
+        #self.in_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1))
+        #self.out_embed.weight.requires_grad = False
+        #self.in_embed.weight.requires_grad = False
 
         if len(pre_train_path) > 0:
+            #print(self.type_offset)
             in_mapping = cPickle.load(open('/shared/data/qiz3/data/' + graph_name +'in_mapping.p'))
+            print(len(in_mapping))
             with open(pre_train_path, 'r') as INPUT:
                 INPUT.readline()
+                #pre_train_emb = np.random.rand(self.num_classes, self.embed_size)
+                #pre_trained_list = set()
                 for line in INPUT:
                     node = line.strip().split(' ')
                     _type, _id = node[0].split(':')
                     _index = in_mapping[_type][_id] + self.type_offset[node_types.index(_type)]
                     self.out_embed.weight.data[_index, :] = t.FloatTensor(map(lambda x:float(x), node[1:]))
                     self.in_embed.weight.data[_index, :] = t.FloatTensor(map(lambda x:float(x), node[1:]))
+                #self.out_embed.weight.data.renorm_(2,0,1)
+                #self.in_embed.weight.data.renorm_(2,0,1)
+                    #pre_trained_list.add(_index)
+                    #pre_train_emb[_index] = np.asarray(map(lambda x:float(x), node[1:]))
+                #print(len(pre_trained_list))
+            #self.out_embed.weight.data.copy_(t.from_numpy(pre_train_emb))
+            #self.in_embed.weight.data.copy_(t.from_numpy(pre_train_emb))
             #self.edge_mapping.append(nn.Linear(self.embed_size, self.embed_size, bias=False).cuda())
-        
-        if self.mode > 0: 
+        print(self.in_embed.weight.sum())
+        if True:
             for tp in edge_types:
-                self.edge_mapping.append(self.genMappingLayer(self.mode))
+                self.edge_mapping.append(utils.DiagLinear(self.embed_size).cuda())
                 #self.edge_mapping.append(utils.SymmLinear(self.embed_size).cuda())
                 #self.edge_mapping[-1].weight = Parameter(t.FloatTensor(self.embed_size, self.embed_size).uniform_(-1, 1).cuda())
-                #self.edge_mapping[-1].weight = Parameter(t.FloatTensor(self.embed_size).uniform_(-1, 1).cuda())
+                self.edge_mapping[-1].weight = Parameter(t.FloatTensor(self.embed_size).uniform_(-1, 1).cuda())
         
         self.type_offset.append(type_offset['sum'])
         print(self.type_offset)
+        print(self.num_classes)
         #print(self.type_offset)
 
-    def genMappingLayer(self, mode):
-        _layer = None
-        if mode == 1:
-            _layer = utils.DiagLinear(self.embed_size).cuda()
-            _layer.weight = Parameter(t.FloatTensor(self.embed_size).uniform_(-1, 1).cuda())
-        else:
-            _layer = utils.SymmLinear(self.embed_size).cuda()
-            _layer.weight = Parameter(t.FloatTensor(self.embed_size, self.embed_size).uniform_(-1, 1).cuda())
-        return _layer
+        self.weights = weights
+        if self.weights is not None:
+            assert min(self.weights) >= 0, "Each weight should be >= 0"
 
+            self.weights = Variable(t.from_numpy(weights)).float()
 
-    def edge_rep(self, inputs, tp):
-        if self.mode == 1:
-            return self.edge_mapping[tp](inputs)
-        else:
-            return inputs
-    
+    def sample(self, num_sample):
+        """
+        draws a sample from classes based on weights
+        """
+        return t.multinomial(self.weights, num_sample, True)
+
     def forward(self, input_labels, out_labels, num_sampled):
         """
         :param input_labels: Tensor with shape of [batch_size] of Long type
@@ -92,10 +101,16 @@ class NEG_loss(nn.Module):
         # use mask
         use_cuda = True
         loss_sum = 0.0
+        sub_batch_sum = 0
 
         types = input_labels[:,0]
         [batch_size, window_size] = out_labels.size()
         window_size -= 1
+        #print(window_size)
+        #print(out_labels)
+        #print(len(types))
+        #map(lambda x: x)
+        #hard encode 4 edge types
 
         for tp in xrange(len(self.edge_types)):
             type_u = self.edge_types[tp][0]
@@ -107,21 +122,31 @@ class NEG_loss(nn.Module):
             if len(indices) == 0:
                 continue
             sub_batch_size = indices.size()[0]
-
+            #print(sub_batch_size)
             input_tensor = t.index_select(input_labels[:,1], 0, indices).repeat(1, window_size).contiguous().view(-1)
+            #print(t.index_select(out_labels, 0, tp_index)[:,1:])
             output_tensor = t.index_select(out_labels[:,1:], 0, indices).contiguous().view(-1)
+            
+        #input_tensor = input_labels.repeat(1, window_size).contiguous().view(-1)
+        
+        #output_tensor = out_labels[:,1:].contiguous().view(-1)
 
             if use_cuda:
                 input_tensor = input_tensor.cuda()
                 output_tensor = output_tensor.cuda()
-
+            
             input = self.in_embed(Variable(input_tensor))
             output = self.out_embed(Variable(output_tensor))
 
-            noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
-                             uniform_(0, self.type_offset[type_u+1] - self.type_offset[type_u] - 1).add_(self.type_offset[type_u]).long())
-            cp_noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
-                             uniform_(0, self.type_offset[type_v+1] - self.type_offset[type_v] - 1).add_(self.type_offset[type_v]).long())
+            if self.weights is not None:
+                noise_sample_count = sub_batch_size * window_size * num_sampled
+                draw = self.sample(noise_sample_count)
+                noise = draw.view(sub_batch_size * window_size, num_sampled)
+            else:
+                noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
+                                 uniform_(0, self.type_offset[type_u+1] - self.type_offset[type_u] - 1).add_(self.type_offset[type_u]).long())
+                cp_noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
+                                 uniform_(0, self.type_offset[type_v+1] - self.type_offset[type_v] - 1).add_(self.type_offset[type_v]).long())
 
             if use_cuda:
                 noise = noise.cuda()
@@ -129,41 +154,31 @@ class NEG_loss(nn.Module):
 
             noise = self.in_embed(noise).neg()
             cp_noise = self.out_embed(cp_noise).neg()
-
-            log_target = self.edge_rep(input * output, tp).sum(1).squeeze().sigmoid().log()
+            #print(input.size())
+            #print(output.size())
+            #print(self.edge_mapping[tp].size())
+            
+            log_target = self.edge_mapping[tp](input * output).sum(1).squeeze().sigmoid().log()
+            #log_target = (input * output).sum(1).squeeze().sigmoid().log()
 
             '''[batch_size * window_size, num_sampled, embed_size] * [batch_size * window_size, embed_size, 1] ->
                 [batch_size, num_sampled, 1] -> [batch_size] '''
 
             #squeeze replace size 1
             
-            #sum_log_sampled_u = ( self.edge_mapping[tp](noise*output.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
-            sum_log_sampled_u = self.edge_rep(noise*output.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size), tp).view(-1,self.embed_size).sum(1).squeeze().sigmoid().log()
-            #sum_log_sampled_v = ( self.edge_mapping[tp](cp_noise*input.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
-            sum_log_sampled_v = self.edge_rep(cp_noise*input.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size), tp).view(-1,self.embed_size).sum(1).squeeze().sigmoid().log()
+            sum_log_sampled_u = ( self.edge_mapping[tp](noise*output.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
+            sum_log_sampled_v = ( self.edge_mapping[tp](cp_noise*input.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
             
             #sum_log_sampled_u = t.bmm(noise, output.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
             #sum_log_sampled_v = t.bmm(cp_noise, input.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
 
-            loss = 2 * log_target.sum() + sum_log_sampled_u.sum() + sum_log_sampled_v.sum() #+ input.norm(p=2, dim=1, keepdim=True).sum() + output.norm(p=2, dim=1, keepdim=True).sum() + noise.norm(p=2, dim=1, keepdim=True).sum() + cp_noise.norm(p=2, dim=1, keepdim=True).sum() + self.edge_mapping[tp].weight.norm(p=2, keepdim=True).sum()
-            reg_loss = (input.mul(input).sum() + output.mul(output).sum() + noise.mul(noise).sum() + cp_noise.mul(cp_noise).sum() + sub_batch_size * self.edge_mapping[tp].weight.mul(self.edge_mapping[tp].weight).sum())
-            #loss = log_target.sum() + sum_log_sampled_v.sum()
-            #loss = log_target + sum_log_sampled_v
-            #print(loss)
-            loss_sum -= (loss - self.weight_decay * reg_loss)
+            loss = 2 * log_target.sum() + sum_log_sampled_u.sum() + sum_log_sampled_v.sum() - \
+            (input.mul(input).sum() + output.mul(output).sum() + noise.mul(noise).sum() + cp_noise.mul(cp_noise).sum() + sub_batch_size * self.edge_mapping[tp].weight.mul(self.edge_mapping[tp].weight).sum())
+
+            loss_sum -= loss
+            #sub_batch_sum += sub_batch_size
+        #assert sub_batch_size == batch_size
         return loss_sum / (2 * batch_size)
-
-    def predict(self, inputs, outputs, tp):
-        if use_cuda:
-            input_tensor = inputs.cuda()
-            output_tensor = outputs.cuda()
-
-        input = self.in_embed(Variable(input_tensor))
-        output = self.out_embed(Variable(output_tensor))
-
-        log_target = self.edge_rep(input * output, tp).sum(1).squeeze().sigmoid().log()
-        
-        return log_target
 
     def input_embeddings(self):
         return self.in_embed.weight.data.cpu().numpy()
