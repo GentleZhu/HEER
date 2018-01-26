@@ -8,6 +8,7 @@ class HinLoader(object):
 		self.input = list()
 		self.output = list()
 		self.arg = arg
+		#print(arg['types'])
 		for k in arg['types']:
 			self.in_mapping[k] = dict()
 			self.out_mapping[k] = dict()
@@ -28,7 +29,11 @@ class HinLoader(object):
 				edge = line.strip().split(' ')
 				node_a = edge[0].split(':')
 				node_b = edge[1].split(':')
-				self.input.append([self.arg['types'].index(node_a[0]), self.inNodeMapping(node_a[1], node_a[0])])
+				node_a_type = self.arg['types'].index(node_a[0])
+				node_b_type = self.arg['types'].index(node_b[0])
+				edge_type = self.arg['edge_types'].index((node_a_type, node_b_type))
+				assert edge_type > -1
+				self.input.append([edge_type, self.inNodeMapping(node_a[1], node_a[0])])
 				self.output.append([self.arg['types'].index(node_b[0]), self.inNodeMapping(node_b[1], node_b[0])])
 				#self.input.append([self.arg['types'].index(node_a[0]), self.arg['types'].index(node_b[0]), self.inNodeMapping(node_a[1], node_a[0]), self.inNodeMapping(node_b[1], node_b[0])])
 				#self.graph[(node_a[0], node_b[0])].append((self.inNodeMapping(node_a[1], node_a[0]), self.inNodeMapping(node_b[1], node_b[0])))
@@ -43,7 +48,7 @@ class HinLoader(object):
 		self.encoder['sum'] = offset
 		print(self.encoder)
 		for i,ie in enumerate(self.input):
-			self.input[i][1] += self.encoder[self.arg['types'][ie[0]]]
+			self.input[i][1] += self.encoder[self.arg['types'][self.arg['edge_types'][ie[0]][0]]]
 		for i,ie in enumerate(self.output):
 			self.output[i][1] += self.encoder[self.arg['types'][ie[0]]]
 			

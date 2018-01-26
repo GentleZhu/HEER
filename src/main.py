@@ -42,10 +42,12 @@ def parse_args():
 
 	parser.add_argument('--node-types', type=list, default=['a', 'p', 'w', 'v', 'y', 'cp'])
 
-	parser.add_argument('--edge-types', type=list, default=[(0,5), (1,5), (2,5), (3,5), (4,5)])
+	parser.add_argument('--edge-types', type=list, default=[(1,0),(1,1),(1,2),(1,3),(1,4)])
+	#parser.add_argument('--edge-types', type=list, default=[(0,5),(1,5),(2,5),(3,5),(4,5)])
 
 	parser.add_argument('--iter', default=500, type=int,
                       help='Number of epochs in SGD')
+	parser.add_argument('--mode', default=0, type=int)
 
 	parser.add_argument('--weighted', dest='weighted', action='store_true',
 	                    help='Boolean specifying (un)weighted. Default is unweighted.')
@@ -67,11 +69,12 @@ def learn_embeddings():
 	#walks = [map(lambda x: x-1, walk) for walk in walks]
 	#model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
 	#print model
+	#print(ast.literal_eval(args.edge_types))
 	model = SkipGram({'emb_size':args.dimensions, \
 		'window_size':args.window_size, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':5,
-		'graph_name': args.graph_name, 
+		'graph_name': args.graph_name,
 		#'pre_train':'/shared/data/qiz3/data/dim_100_attr_nodes_apvwy.emb'}
-		'pre_train':args.pre_train_path, 'node_types':args.node_types, 'edge_types':ast.literal_eval(args.edge_types)})
+		'pre_train':args.pre_train_path, 'node_types':args.node_types, 'edge_types':args.edge_types})
 	model.train()
 	#model.save_word2vec_format(args.output)
 	
@@ -82,13 +85,13 @@ def main(args):
 	Pipeline for representational learning for all nodes in a graph.
 	'''
 	if args.first_time:
-		print(args.node_types)
-		tmp = nx.HinLoader({'graph': args.input, 'types':args.node_types})
+		#print(args.node_types)
+		tmp = nx.HinLoader({'graph': args.input, 'types':args.node_types, 'edge_types':args.edge_types})
 		tmp.readHin()
 		tmp.encode()
 		tmp.dump('/shared/data/qiz3/data/' + args.graph_name)
-	
-	#learn_embeddings()
+	print(args.edge_types)
+	learn_embeddings()
 
 if __name__ == "__main__":
 	args = parse_args()

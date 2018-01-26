@@ -15,8 +15,8 @@ def decode(offset, out_mapping, address):
 			
 
 if __name__ == '__main__':
-	model = t.load('/shared/data/qiz3/data/model/' + sys.argv[1] +'.pt')
-	prefix = ''
+	model = t.load('/shared/data/qiz3/data/model/diag_' + sys.argv[1] +'.pt')
+	prefix = 'dblp_'
 	emb = model.input_embeddings()
 	offset = cPickle.load(open('/shared/data/qiz3/data/' + prefix + 'offset.p'))
 	out_mapping = cPickle.load(open('/shared/data/qiz3/data/' + prefix + 'out_mapping.p'))
