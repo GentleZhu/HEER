@@ -198,6 +198,7 @@ def build_file(ko_dic,a_dic,p_dic,o_dic,index2type,type_dic,sample_number,file_2
             content=content+"".join(content_temp)
             rd+=1
             if rd % buffer_size ==0:
+                print (buffer_size,'batches finished')
                 file.write(content)
                 content=''
     file.write(content)
