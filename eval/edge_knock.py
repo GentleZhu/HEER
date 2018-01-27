@@ -220,7 +220,7 @@ if __name__ == '__main__':
     parser.add_argument("--sample-number", nargs="?", help="Input sample number generated per node", type=int)
     parser.add_argument("--output-file-1", nargs="?", help="Output file_1.", type=str)
     parser.add_argument("--output-file-2", nargs="?", help="Output file_2.", type=str)
-    parser.add_argument("--buffer-size", nargs="?", help="Buffer Size.", type=str)
+    parser.add_argument("--buffer-size", nargs="?", help="Buffer Size.", type=int)
 
     args = parser.parse_args()
     filename0=args.input_index2name
