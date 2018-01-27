@@ -196,8 +196,8 @@ def build_file(ko_dic,a_dic,p_dic,o_dic,index2type,type_dic,sample_number,file_2
                         content_temp.append(temp)
                         count+=1
             content=content+"".join(content_temp)
+            rd+=1
             if rd % buffer_size ==0:
-                
                 file.write(content)
                 content=''
     file.write(content)
