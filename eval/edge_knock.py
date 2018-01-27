@@ -111,7 +111,7 @@ def ko_edge(tuple_list,ko_rate,a_dic,p_dic,index2type,file_1):
 
             
 #neagtive sampling, one from ko_list with another 20 from random sampling with same nodes
-def build_file(ko_dic,a_dic,p_dic,o_dic,index2type,type_dic,sample_number,file_2):
+def build_file(ko_dic,a_dic,p_dic,o_dic,index2type,type_dic,sample_number,file_2,buffer_size):
     p_list=list(p_dic)
     a_list=list(a_dic)
     o_list={}
@@ -123,6 +123,7 @@ def build_file(ko_dic,a_dic,p_dic,o_dic,index2type,type_dic,sample_number,file_2
     elapsed_time = time.time() - start_time
     print(elapsed_time)
     content=''
+    rd=0
     for key,dic in ko_dic.items():   
         content_temp=[]
         for sub_key,edge in dic.items():
@@ -195,6 +196,10 @@ def build_file(ko_dic,a_dic,p_dic,o_dic,index2type,type_dic,sample_number,file_2
                         content_temp.append(temp)
                         count+=1
             content=content+"".join(content_temp)
+            if rd % buffer_size ==0:
+                
+                file.write(content)
+                content=''
     file.write(content)
     file.close()
     
@@ -215,6 +220,7 @@ if __name__ == '__main__':
     parser.add_argument("--sample-number", nargs="?", help="Input sample number generated per node", type=int)
     parser.add_argument("--output-file-1", nargs="?", help="Output file_1.", type=str)
     parser.add_argument("--output-file-2", nargs="?", help="Output file_2.", type=str)
+    parser.add_argument("--buffer-size", nargs="?", help="Buffer Size.", type=str)
 
     args = parser.parse_args()
     filename0=args.input_index2name
@@ -302,7 +308,8 @@ if __name__ == '__main__':
     file_1=args.output_file_1
     file_2=args.output_file_2
     ko_dic,tuple_list=ko_edge(tuple_list,ko_rate,a_dic,p_dic,index2type,file_1)
-    build_file(ko_dic,a_dic,p_dic,o_dic,index2type,type_dic,sample_number,file_2)
+    buffer_size=args.buffer_size
+    build_file(ko_dic,a_dic,p_dic,o_dic,index2type,type_dic,sample_number,file_2,buffer_size)
     elapsed_time = time.time() - start_time
     print(elapsed_time)
     
