@@ -8,6 +8,7 @@ Created on Fri Jan 19 12:39:34 2018
 import numpy as np
 import argparse
 import time
+import warnings
 
 def calculate_rr(batch):
     target=batch[0]
@@ -25,6 +26,8 @@ if __name__ == '__main__':
    
     parser.add_argument("--input-record", nargs="?", help="Input record filename.", type=str)
     
+    parser.add_argument("--sample-number", nargs="?", help="Input sample number generated per node", type=int)
+    
     args = parser.parse_args()
     embedding_dict={}
     input_embedding=args.input_embedding
@@ -40,16 +43,18 @@ if __name__ == '__main__':
     input_newfile=args.input_record
     
     with open(input_newfile, "r") as f_in:
+        warnings.simplefilter('always', ImportWarning)
         count=0
         total_mrr={}
 
         exist=False
         rd=0
         checksametype=False
+        sample_number=args.sample_number
         for line in f_in:
             line_split = line.split(' ')
-            key1=line_split[0].lower()
-            key2=line_split[1].lower()
+            key1=line_split[0]
+            key2=line_split[1]
             #print(key1[0],key2[0])
             if count==0: 
                 current=[]
@@ -68,13 +73,27 @@ if __name__ == '__main__':
                     exist =True
                     target=embedding_dict[key1].dot(embedding_dict[key2])
                     current.append(target) 
+                else:
+                    if key1 not in embedding_dict:
+                        warning_word=key1+' does not exist.'
+                        warnings.warn(warning_word)
+                    if key2 not in embedding_dict:
+                        warning_word=key2+' does not exist.'
+                        warnings.warn(warning_word)
                     #print(target)
                 count+=1
             else:
                 if exist:
                     if key1 in embedding_dict and key2 in embedding_dict:
                         current.append(embedding_dict[key1].dot(embedding_dict[key2])) 
-                if count==10 and checksametype==False:
+                    else:
+                        if key1 not in embedding_dict:
+                            warning_word=key1+' does not exist.'
+                            warnings.warn(warning_word)
+                        if key2 not in embedding_dict:
+                            warning_word=key2+' does not exist.'
+                            warnings.warn(warning_word)
+                if count==sample_number and checksametype==False:
                     if exist:
                         edge_type=key1[0]+key2[0]
                         #print('10-',edge_type,current)
@@ -82,7 +101,7 @@ if __name__ == '__main__':
                         total_mrr[edge_type].append(rr) 
                         current=[]
                         current.append(target)
-                if count==20:  
+                if count==(sample_number*2):  
                     if exist: 
                         edge_type=key1[0]+key2[0]
                         #print('20-',edge_type,current)

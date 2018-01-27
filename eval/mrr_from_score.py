@@ -9,6 +9,7 @@ import numpy as np
 import sys
 import time
 import argparse
+import warnings
 
 def calculate_rr(batch):
     target=batch[0]
@@ -21,31 +22,35 @@ def calculate_rr(batch):
 if __name__ == '__main__':
     start_time = time.time()
     parser = argparse.ArgumentParser(description="Read in input and output filenames.")
-    parser.add_argument("--input-embedding-file", nargs="?", help="Input embedding filename.", type=str)
+    parser.add_argument("--input-score-file", nargs="?", help="Input score filename.", type=str)
     parser.add_argument("--input-record-file", nargs="?", help="Input record filename.", type=str)
+    parser.add_argument("--sample-number", nargs="?", help="Input sample number generated per node", type=int)
 
-    
+    args = parser.parse_args()
     score_dict={}
-    input_scorefile=sys.argv[1]
+    input_scorefile=args.input_score_file
     with open(input_scorefile, "r") as f_in:
         for line in f_in:
             line_split = line.strip().split()
-            key=line_split[0].lower()+' '+line_split[1].lower()
+            key=line_split[0]+' '+line_split[1]
             score_dict[key]=line_split[2]
     print ("Loading done.", len(score_dict), "pairs from", input_scorefile)
-    input_recordfile='kn2/file2.txt'
+    input_recordfile=args.input_record_file
     
     with open(input_recordfile, "r") as f_in:
+        warnings.simplefilter('always', ImportWarning)
         count=0
         total_mrr={}
         
         exist=False
         checksametype=False
+        sample_number=args.sample_number
+
         rd=0
         for line in f_in:
             line_split = line.split(' ')
-            key1=line_split[0].lower()
-            key2=line_split[1].lower()
+            key1=line_split[0]
+            key2=line_split[1]
             key=key1+' '+key2
             
             #print(key1[0],key2[0])
@@ -66,13 +71,19 @@ if __name__ == '__main__':
                     target=score_dict[key]
                     current.append(target) 
                     #print(target)
-                    
+                else:
+                    warning_word=key+" does not exist."
+                    warnings.warn(warning_word)
+                   
                 count+=1
             else:
                 if exist:
                     if key in score_dict:
                         current.append(score_dict[key]) 
-                if count==10 and checksametype==False:
+                    else:
+                        warning_word=key+" does not exist."
+                        warnings.warn(warning_word)
+                if count==sample_number and checksametype==False:
                     if exist:
                         edge_type=key1[0]+key2[0]
                         #print('10-',edge_type,current)
@@ -81,7 +92,7 @@ if __name__ == '__main__':
                         
                         current=[]
                         current.append(target)
-                if count==20:  
+                if count==(sample_number*2):  
                     if exist: 
                         edge_type=key1[0]+key2[0]
                         #print('20-',edge_type,current)
