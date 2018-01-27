@@ -15,7 +15,7 @@ output_file = args.output_file
 
 typed_node_pair_to_line_dict = {}
 # repeat for each file in the directory
-for input_score_file_basename in os.listdir(path=input_score_dir):
+for input_score_file_basename in os.listdir(input_score_dir):
    # apply file type filter
    if input_score_keywords in input_score_file_basename:
        with open(os.path.join(input_score_dir, input_score_file_basename), "r") as f_in_score:

@@ -16,7 +16,7 @@ parser.add_argument("--score-file", nargs="?", help="Input embedding filename.",
 args = parser.parse_args()
 
 input_scorefile=args.score_file
-input_newfile=args.eval_file # '../input_data/dblp_0.1_out_20neg_eval.txt'
+input_recordfile=args.eval_file # '../input_data/dblp_0.1_out_20neg_eval.txt'
 
 def calculate_rr(batch):
     target=batch[0]
@@ -33,7 +33,8 @@ if __name__ == '__main__':
     with open(input_scorefile, "r") as f_in:
         for line in f_in:
             line_split = line.strip().split()
-            key=line_split[0].lower()+' '+line_split[1].lower()
+            #key=line_split[0].lower()+' '+line_split[1].lower()
+            key=line_split[0]+' '+line_split[1]
             score_dict[key]=line_split[2]
     print ("Loading done.", len(score_dict), "pairs from", input_scorefile)
     #input_recordfile='kn2/file2.txt'
