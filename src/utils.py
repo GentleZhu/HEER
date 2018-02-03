@@ -1,6 +1,60 @@
 import torch
 import torch.nn as nn
 from torch.nn import Parameter
+import numpy as np
+import cPickle
+
+def load_emb(emb_path, emb_size, graph_name, node_types):
+    in_mapping = cPickle.load(open('/shared/data/qiz3/data/' + graph_name +'in_mapping.p'))
+    type_offset = cPickle.load(open('/shared/data/qiz3/data/' + graph_name + 'offset.p'))
+    with open(emb_path, 'r') as INPUT:
+        _data = np.zeros((type_offset['sum'], emb_size))
+        print(type_offset)
+        INPUT.readline()
+        INPUT.readline()
+        for line in INPUT:
+            node = line.strip().split(' ')
+            _type, _id = node[0].split(':')
+            _index = in_mapping[_type][_id] + type_offset[_type]
+            _data[_index, :] = np.asarray(map(lambda x:float(x), node[1:]))
+    return _data
+
+def clip_grad_norm(parameters, max_norm, norm_type=2):
+    parameters = list(filter(lambda p: p.grad is not None, parameters))
+    max_norm = float(max_norm)
+    norm_type = float(norm_type)
+    if norm_type == float('inf'):
+        total_norm = max(p.grad.data.abs().max() for p in parameters)
+    else:
+        total_norm = 0
+        for p in parameters:
+            param_norm = p.grad.data.norm(norm_type)
+            total_norm += param_norm ** norm_type
+        total_norm = total_norm ** (1. / norm_type)
+    clip_coef = max_norm / (total_norm + 1e-6)
+    if clip_coef < 1:
+        for p in parameters:
+            p.grad.data.mul_(clip_coef)
+        return 1
+    else:
+        return 0
+
+def clip_sparse_grad_norm(parameters, max_norm, norm_type=2):
+    parameters = list(filter(lambda p: p.grad is not None, parameters))
+    max_norm = float(max_norm)
+    norm_type = float(norm_type)
+    if norm_type == float('inf'):
+        total_norm = max(p.grad.data.abs().max() for p in parameters)
+    else:
+        for p in parameters:
+            param_norm = p.grad.data._values().norm(norm_type, 1)
+            if param_norm.max() > max_norm:
+                param_norm.clamp_(min=max_norm).div_(max_norm).unsqueeze_(1)
+                #1 how often cut
+                #2 cut balanced not 
+                p.grad.data._values().div_(param_norm)
+                return (param_norm > 1.0).sum()
+    return 0
 
 class DiagLinear(nn.Module):
     def __init__(self, input_features):
