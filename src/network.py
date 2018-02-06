@@ -8,6 +8,7 @@ class HinLoader(object):
 		self.input = list()
 		self.output = list()
 		self.arg = arg
+		self.edge_stat = [0] * len(self.arg['edge_types'])
 		#print(arg['types'])
 		for k in arg['types']:
 			self.in_mapping[k] = dict()
@@ -32,6 +33,7 @@ class HinLoader(object):
 				node_a_type = self.arg['types'].index(node_a[0])
 				node_b_type = self.arg['types'].index(node_b[0])
 				edge_type = self.arg['edge_types'].index((node_a_type, node_b_type))
+				self.edge_stat[edge_type] += 1
 				assert edge_type > -1
 				self.input.append([edge_type, self.inNodeMapping(node_a[1], node_a[0])])
 				self.output.append([self.arg['types'].index(node_b[0]), self.inNodeMapping(node_b[1], node_b[0])])
@@ -54,8 +56,10 @@ class HinLoader(object):
 			
 
 	def dump(self, dump_path):
+		print(self.edge_stat)
 		cPickle.dump(self.encoder, open(dump_path + 'offset.p', 'wb'))
 		cPickle.dump(self.input, open(dump_path + 'input.p', 'wb'))
 		cPickle.dump(self.output, open(dump_path + 'output.p', 'wb'))
 		cPickle.dump(self.in_mapping, open(dump_path + 'in_mapping.p', 'wb'))
 		cPickle.dump(self.out_mapping, open(dump_path + 'out_mapping.p', 'wb'))
+		cPickle.dump(self.edge_stat, open(dump_path + 'edge_stat.p', 'wb'))

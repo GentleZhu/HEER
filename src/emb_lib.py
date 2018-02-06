@@ -83,7 +83,7 @@ class SkipGram(object):
 				
 
 			if epoch % 5 == 0:
-				t.save(self.neg_loss.state_dict(), '/shared/data/qiz3/data/model/dblp_0.1_' + str(epoch) + '_heer.pt')
+				t.save(self.neg_loss.state_dict(), '/shared/data/qiz3/data/model/dblp_0.2_' + str(epoch) + '_heer.pt')
 			#if epoch % 20 == 0:
 			#print(num_batches)
 			print(epoch, loss_sum)

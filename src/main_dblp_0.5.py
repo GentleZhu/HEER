@@ -4,9 +4,9 @@ from emb_lib import SkipGram
 import torch as t
 import torch.utils.data as tdata
 import cPickle
-args = {'emb_size':128, 'window_size':1, 'batch_size':128, 'iter':40, 'neg_ratio':5, 'graph_name':'dblp_0.1_',
-       'pre_train_path':'/shared/data/yushi2/edge_rep_codes/intermediate_data/dblp_0.1_out_line_samples100000_alpha0.1_dim128.emb',
-       'node_types':['A','P','Y','W','V'], 'edge_types':[(1,0),(1,1),(1,2),(1,3),(1,4)], 'gpu':7, 'lr':2.5, 'mode': 0}
+args = {'emb_size':128, 'window_size':1, 'batch_size':128, 'iter':40, 'neg_ratio':5, 'graph_name':'dblp_0.5_',
+       'pre_train_path':'/shared/data/yushi2/edge_rep_codes/intermediate_data/dblp_0.5_out_line_samples200000_alpha0.1_dim128.emb',
+       'node_types':['A','P','Y','W','V'], 'edge_types':[(1,0),(1,1),(1,2),(1,3),(1,4)], 'gpu':2, 'lr':2.5, 'mode': 1}
 print(args)
 t.cuda.set_device(int(args['gpu']))
 t.cuda.empty_cache()
