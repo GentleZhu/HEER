@@ -41,6 +41,8 @@ class SkipGram(object):
 		#	t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/' + arg['graph_name'] + 'output.p'))))
 
 		self.window_size = arg['window_size']
+		self.graph_name = arg['graph_name']
+		self.mode = arg['mode']
 		self.data = tdata.DataLoader(self.input, arg['batch_size'], shuffle=True)
 		self.batch_size = arg['batch_size']
 		self.iter = arg['iter']
@@ -83,7 +85,7 @@ class SkipGram(object):
 				
 
 			if epoch % 5 == 0:
-				t.save(self.neg_loss.state_dict(), '/shared/data/qiz3/data/model/dblp_0.2_' + str(epoch) + '_heer.pt')
+				t.save(self.neg_loss.state_dict(), '/shared/data/qiz3/data/model/' + self.graph_name + str(epoch) + '_heer_mode_' + str(self.mode) + '.pt')
 			#if epoch % 20 == 0:
 			#print(num_batches)
 			print(epoch, loss_sum)

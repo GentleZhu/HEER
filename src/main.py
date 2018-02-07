@@ -91,7 +91,7 @@ def main(args):
 		tmp.encode()
 		tmp.dump('/shared/data/qiz3/data/' + args.graph_name)
 	print(args.edge_types)
-	learn_embeddings()
+	#learn_embeddings()
 
 if __name__ == "__main__":
 	args = parse_args()

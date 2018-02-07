@@ -44,7 +44,7 @@ class HinLoader(object):
 	def encode(self):
 		self.encoder = dict()
 		offset = 0
-		for k in self.in_mapping:
+		for k in self.arg['types']:
 			self.encoder[k] = offset
 			offset += len(self.in_mapping[k])
 		self.encoder['sum'] = offset
