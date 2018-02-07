@@ -73,7 +73,7 @@ class NEG_loss(nn.Module):
         _layer = None
         if mode != 2:
             _layer = utils.DiagLinear(self.embed_size).cuda()
-            _layer.weight = Parameter(t.FloatTensor(self.embed_size).uniform_(-1, 1).cuda())
+            _layer.weight = Parameter(t.FloatTensor(self.embed_size).fill_(1.0).cuda())
         elif mode == 2:
             _layer = utils.SymmLinear(self.embed_size).cuda()
             #_layer.weight = Parameter(t.FloatTensor(self.embed_size * self.embed_size).fill_(1.0).cuda())
