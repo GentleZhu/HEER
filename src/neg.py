@@ -121,8 +121,6 @@ class NEG_loss(nn.Module):
         window_size -= 1
         #sub_batches = []
         for tp in xrange(len(self.edge_types)):
-            #if tp == 11:
-            #    continue
             loss = 0.0
             reg_loss = 0.0
             type_u = self.edge_types[tp][0]
@@ -133,6 +131,8 @@ class NEG_loss(nn.Module):
             #print(indices)
             if len(indices) == 0:
                 continue
+            #make sure here
+            assert tp != 11
             sub_batch_size = indices.size()[0]
             #sub_batches.append(sub_batch_size)
 
@@ -143,42 +143,58 @@ class NEG_loss(nn.Module):
                 input_tensor = input_tensor.cuda()
                 output_tensor = output_tensor.cuda()
 
-            input = self.in_embed(Variable(input_tensor))
-            output = self.out_embed(Variable(output_tensor))
+            u_input = self.in_embed(Variable(input_tensor))
+            v_output = self.out_embed(Variable(output_tensor))
 
-            _noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
+            _u_noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
                              uniform_(0, self.type_offset[type_u+1] - self.type_offset[type_u] - 1).add_(self.type_offset[type_u]).long())
-            _cp_noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
+            _v_noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
                              uniform_(0, self.type_offset[type_v+1] - self.type_offset[type_v] - 1).add_(self.type_offset[type_v]).long())
+            #_noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
+            #                 uniform_(0, self.type_offset[-1] - self.type_offset[0] - 1).add_(self.type_offset[0]).long())
+            #_cp_noise = Variable(t.Tensor(sub_batch_size * window_size, num_sampled).
+            #                 uniform_(0, self.type_offset[-1] - self.type_offset[0] - 1).add_(self.type_offset[0]).long())
 
             if use_cuda:
-                _noise = _noise.cuda()
-                _cp_noise = _cp_noise.cuda()
+                _u_noise = _u_noise.cuda()
+                _v_noise = _v_noise.cuda()
 
-            noise = self.in_embed(_noise).neg()
-            cp_noise = self.out_embed(_cp_noise).neg()
+            u_noise_input = self.in_embed(_u_noise).neg()
+            v_noise_output = self.out_embed(_v_noise).neg()
 
             
 
-            sum_log_sampled_u = self.edge_rep(noise.view(-1, self.embed_size), output.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-            sum_log_sampled_v = self.edge_rep(cp_noise.view(-1, self.embed_size), input.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+            #u input_tensor
+            #v output_tensor
 
-            if not self.directed and type_u != type_v:
-                u_input = self.in_embed(Variable(output_tensor))
+            if type_u != type_v:
                 u_output = self.out_embed(Variable(input_tensor))
-                u_noise = self.in_embed(_cp_noise).neg()
-                u_cp_noise = self.out_embed(_noise).neg()
-                log_target = self.edge_rep(input, u_input, tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                reverse_log_target = self.edge_rep(output , u_output, tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                reverse_sum_log_sampled_u = self.edge_rep(u_noise.view(-1, self.embed_size), u_output.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                reverse_sum_log_sampled_v = self.edge_rep(u_cp_noise.view(-1, self.embed_size), u_input.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                loss = log_target.sum() + reverse_log_target.sum() + (sum_log_sampled_u.sum() + sum_log_sampled_v.sum() + reverse_sum_log_sampled_u.sum() + reverse_sum_log_sampled_v.sum()) / 2
-                reg_loss = (input.mul(input).sum() + output.mul(output).sum() + noise.mul(noise).sum() + cp_noise.mul(cp_noise).sum() + 
-                u_input.mul(u_input).sum() + u_output.mul(u_output).sum() + u_noise.mul(u_noise).sum() + u_cp_noise.mul(u_cp_noise).sum()) / 2
+                v_input = self.in_embed(Variable(output_tensor))
+                
+                u_noise_output = self.out_embed(_u_noise).neg()
+                v_noise_input = self.in_embed(_v_noise).neg()
+                
+                
+                log_target_input = self.edge_rep(u_input, v_input, tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                log_target_output = self.edge_rep(u_output , v_output, tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                
+                sum_log_u_noise_v_input = self.edge_rep(u_noise_input.view(-1, self.embed_size), v_input.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_noise_v_output = self.edge_rep(u_noise_output.view(-1, self.embed_size), v_output.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+
+                sum_log_u_v_noise_input = self.edge_rep(v_noise_input.view(-1, self.embed_size), u_input.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_v_noise_output = self.edge_rep(v_noise_output.view(-1, self.embed_size), u_output.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                
+                
+                
+                loss = log_target_input.sum() + log_target_output.sum() + (sum_log_u_noise_v_input.sum() + sum_log_u_noise_v_output.sum() + sum_log_u_v_noise_input.sum() + sum_log_u_v_noise_output.sum()) / 2
+                reg_loss = (u_input.mul(u_input).sum() + v_output.mul(v_output).sum() + u_output.mul(u_output).sum() + v_input.mul(v_input).sum() + 
+                u_noise_input.mul(u_noise_input).sum() + u_noise_output.mul(u_noise_output).sum() + v_noise_input.mul(v_noise_input).sum() + v_noise_output.mul(v_noise_output).sum()) / 2
             else:
-                log_target = self.edge_rep(input, output, tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                loss = 2 * log_target.sum() + sum_log_sampled_u.sum() + sum_log_sampled_v.sum()
-                reg_loss = input.mul(input).sum() + output.mul(output).sum() + noise.mul(noise).sum() + cp_noise.mul(cp_noise).sum()
+                log_target = self.edge_rep(u_input, v_output, tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_noise_v = self.edge_rep(u_noise_input.view(-1, self.embed_size), v_output.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_v_noise = self.edge_rep(v_noise_output.view(-1, self.embed_size), u_input.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                loss = 2 * log_target.sum() + sum_log_u_noise_v.sum() + sum_log_u_v_noise.sum()
+                reg_loss = u_input.mul(u_input).sum() + v_output.mul(v_output).sum() + u_noise_input.mul(u_noise_input).sum() + v_noise_output.mul(v_noise_output).sum()
 
             #if tp != 1:
 
@@ -228,19 +244,23 @@ class NEG_loss(nn.Module):
             inputs = inputs.cuda()
             outputs = outputs.cuda()
 
-        input = self.in_embed(Variable(inputs))
-        output = self.out_embed(Variable(outputs))
+        u_input = self.in_embed(Variable(inputs))
+        v_output = self.out_embed(Variable(outputs))
 
         if not directed:
-            u_input = self.in_embed(Variable(outputs))
+            
             u_output = self.out_embed(Variable(inputs))
-            log_target = self.edge_rep(input, u_input, tp).sum(1).squeeze().sigmoid() + self.edge_rep(output, u_output, tp).sum(1).squeeze().sigmoid()
+            v_input = self.in_embed(Variable(outputs))
+
+            log_target = self.edge_rep(u_input, v_input, tp).sum(1).squeeze().sigmoid() + self.edge_rep(u_output, v_output, tp).sum(1).squeeze().sigmoid()
             log_target /= 2
         else:
-            log_target = self.edge_rep(input, output, tp).sum(1).squeeze().sigmoid()
+            log_target = self.edge_rep(u_input, v_output, tp).sum(1).squeeze().sigmoid()
         #log_target = (input * output).sum(1).squeeze().sigmoid()
         
         return log_target.data.cpu().numpy().tolist()
 
     def input_embeddings(self):
         return self.in_embed.weight.data.cpu().numpy()
+    def output_embeddings(self):
+        return self.out_embed.weight.data.cpu().numpy()
