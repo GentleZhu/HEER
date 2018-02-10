@@ -2,6 +2,7 @@ import torch as t
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn import Parameter
+import torch.nn.functional as F
 import numpy as np
 import cPickle
 import utils
@@ -33,7 +34,9 @@ class NEG_loss(nn.Module):
         self.in_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
 
         self.edge_mapping = nn.ModuleList()
+        self.edge_mapping_bn = nn.ModuleList()
         self.out_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
+        self.training = True
 
         #self.add_module('in_emb', self.in_embed)
         #self.add_module('out_emb', self.out_embed)
@@ -58,12 +61,17 @@ class NEG_loss(nn.Module):
             self.out_embed.weight.data.copy_(t.from_numpy(pre_train_path))
             self.in_embed.weight.data.div_(10)
             self.out_embed.weight.data.div_(10)
-            #self.out_embed.weight.data.renorm_(p=2, dim=0, maxnorm=2)
+            
+	    #self.out_embed.weight.data.renorm_(p=2, dim=0, maxnorm=2)
             #self.edge_mapping.append(nn.Linear(self.embed_size, self.embed_size, bias=False).cuda())
         
-        if self.mode > 0: 
+        if self.mode != 0: 
             for tp in edge_types:
                 self.edge_mapping.append(self.genMappingLayer(self.mode))
+                if self.mode == -1:
+                    self.edge_mapping_bn.append(nn.BatchNorm1d(self.embed_size).cuda())
+                #if self.mode == -2:
+                    #self.edge_mapping_bn.append(nn.Dropout().cuda())
         
         self.type_offset.append(type_offset['sum'])
         print(self.type_offset)
@@ -88,6 +96,14 @@ class NEG_loss(nn.Module):
         #mode 4: addition
         if self.mode == 1:
             return self.edge_mapping[tp](input_a * input_b)
+        elif self.mode == -1:
+            if input_a.size()[0] == 1:
+                return self.edge_mapping[tp](input_a * input_b)
+            else:
+                return self.edge_mapping_bn[tp](self.edge_mapping[tp](input_a * input_b))
+        #elif self.mode == -2:
+        #    return F.dropout(self.edge_mapping[tp](input_a * input_b), training=self.training)
+
         elif self.mode == 2:
             return self.edge_mapping[tp](t.bmm(input_a.unsqueeze(2), input_b.unsqueeze(1)).view(-1, self.embed_size ** 2) + 
                 t.bmm(input_b.unsqueeze(2), input_a.unsqueeze(1)).view(-1, self.embed_size ** 2) )
@@ -168,6 +184,7 @@ class NEG_loss(nn.Module):
             #v output_tensor
 
             if type_u != type_v:
+            #if True:
                 u_output = self.out_embed(Variable(input_tensor))
                 v_input = self.in_embed(Variable(output_tensor))
                 
@@ -246,7 +263,7 @@ class NEG_loss(nn.Module):
 
         u_input = self.in_embed(Variable(inputs))
         v_output = self.out_embed(Variable(outputs))
-
+        log_target = 0.0
         if not directed:
             
             u_output = self.out_embed(Variable(inputs))
