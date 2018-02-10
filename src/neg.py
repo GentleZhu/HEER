@@ -36,7 +36,7 @@ class NEG_loss(nn.Module):
         self.edge_mapping = nn.ModuleList()
         self.edge_mapping_bn = nn.ModuleList()
         self.out_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
-        self.training = True
+
 
         #self.add_module('in_emb', self.in_embed)
         #self.add_module('out_emb', self.out_embed)
@@ -59,8 +59,9 @@ class NEG_loss(nn.Module):
             '''
             self.in_embed.weight.data.copy_(t.from_numpy(pre_train_path))
             self.out_embed.weight.data.copy_(t.from_numpy(pre_train_path))
-            self.in_embed.weight.data.div_(10)
-            self.out_embed.weight.data.div_(10)
+            
+            #self.in_embed.weight.data.div_(10)
+            #self.out_embed.weight.data.div_(10)
             
 	    #self.out_embed.weight.data.renorm_(p=2, dim=0, maxnorm=2)
             #self.edge_mapping.append(nn.Linear(self.embed_size, self.embed_size, bias=False).cuda())
@@ -98,9 +99,9 @@ class NEG_loss(nn.Module):
             return self.edge_mapping[tp](input_a * input_b)
         elif self.mode == -1:
             if input_a.size()[0] == 1:
-                return self.edge_mapping[tp](input_a * input_b)
+                return F.relu(self.edge_mapping[tp](input_a * input_b))
             else:
-                return self.edge_mapping_bn[tp](self.edge_mapping[tp](input_a * input_b))
+                return F.relu(self.edge_mapping_bn[tp](self.edge_mapping[tp](input_a * input_b)))
         #elif self.mode == -2:
         #    return F.dropout(self.edge_mapping[tp](input_a * input_b), training=self.training)
 
