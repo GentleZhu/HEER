@@ -1,4 +1,4 @@
-import neg
+import neg_yago as neg
 import torch.optim as optim
 import torch as t
 import numpy as np
@@ -22,19 +22,20 @@ class SkipGram(object):
 		#print('edge layer learning rate is:', arg['lr'] * (float(len(arg['edge_types'])) / type_offset['sum']))
 		edge_stats = cPickle.load(open('/shared/data/qiz3/data/' + arg['graph_name'] + 'edge_stat.p'))
 		#print(edge_stats)
-		_params = [{'params': self.neg_loss.in_embed.parameters()}, 
-			{'params': self.neg_loss.out_embed.parameters()}]
-		#for param in self.neg_loss.in_embed.parameters():
-		#	param.requires_grad = False
-		#for param in self.neg_loss.out_embed.parameters():
-		#	param.requires_grad = False
-		#_params = []
-		for i in xrange(len(self.neg_loss.edge_mapping)):
-			_params.append({'params': self.neg_loss.edge_mapping[i].parameters(), 
-				'lr': arg['lr'] * arg['lr_ratio'] * (float(len(self.input))) / (type_offset['sum'] * edge_stats[i])})
-		self.SGD = optim.SGD(_params, lr = arg['lr'])
+		self.mode = arg['mode']
+		if self.mode >= 1:
+			_params = [{'params': self.neg_loss.in_embed.parameters()}, 
+				{'params': self.neg_loss.out_embed.parameters()}]
+			for i in xrange(len(self.neg_loss.edge_mapping)):
+				_params.append({'params': self.neg_loss.edge_mapping[i].parameters(),
+					'lr': arg['lr']})
+					#'lr': arg['lr'] * arg['lr_ratio'] * (float(len(self.input))) / (type_offset['sum'] * edge_stats[i] + 1e-6)})
+			self.SGD = optim.SGD(_params, lr = arg['lr'])
+			self.edge_lr_ratio = arg['lr_ratio']
+		else:
+			# mode <=0, with 
+			self.SGD = optim.SGD(self.neg_loss.parameters(), lr = arg['lr'])
 		#self.SGD = optim.SGD(self.neg_loss.edge_mapping.parameters(), lr = 0.25)
-		#self.SGD = optim.SGD(self.neg_loss.parameters(), lr = arg['lr'])
 		#print(self.neg_loss.edge_mapping)
 		
 		#self.input = tdata.TensorDataset(t.LongTensor(cPickle.load(open('/shared/data/qiz3/data/' + arg['graph_name'] + 'input.p'))), 
@@ -42,7 +43,7 @@ class SkipGram(object):
 
 		self.window_size = arg['window_size']
 		self.graph_name = arg['graph_name']
-		self.mode = arg['mode']
+		
 		self.data = tdata.DataLoader(self.input, arg['batch_size'], shuffle=True)
 		self.batch_size = arg['batch_size']
 		self.iter = arg['iter']
@@ -85,7 +86,8 @@ class SkipGram(object):
 				
 
 			if epoch % 5 == 0:
-				t.save(self.neg_loss.state_dict(), '/shared/data/qiz3/data/model/' + self.graph_name + str(epoch) + '_heer_mode_' + str(self.mode) + '.pt')
+				t.save(self.neg_loss.state_dict(), '/shared/data/qiz3/data/model/' + self.graph_name + str(epoch) + '_heer_mode_' + str(self.mode) + 
+					'_lr_' + str(self.edge_lr_ratio)+ '.pt')
 			#if epoch % 20 == 0:
 			#print(num_batches)
 			print(epoch, loss_sum)
