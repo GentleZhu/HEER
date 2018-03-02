@@ -64,7 +64,7 @@ _All the commands are executed from the project home directory._<br/>
 
 Here is an exmaple of generating output files
 
-			python edge_knock.py --input-p2a-file all_p2a.txt --input-p2o-file all_p2o.txt --input-index2name index2name.txt --ko-rate 0.2 --sample-number 10 --path-output dataset
+		python edge_knock.py --input-p2a-file all_p2a.txt --input-p2o-file all_p2o.txt --input-index2name index2name.txt --ko-rate 0.2 --sample-number 10 --path-output dataset
 
 ## Citing
 
