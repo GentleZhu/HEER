@@ -1,19 +1,22 @@
 # README
 ## Train embedding
-source /shared/data/qiz3/qiz3/bin/activate
-
 ```
+source /shared/data/qiz3/qiz3/bin/activate
 bash ./src/run.sh
 ```
 
 ## specifications
 CHECK parameters op and map\_func in run.sh
+
 operator:
+
 	1. hadamard product
 	2. outer-product
 	3. deduction
 	4. addition
+	
 mapping function:
+
 	1. linear mapping
 	2. linear mappng with batch norm
 	3. lienar mapping + batch norm + ReLu
