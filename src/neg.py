@@ -9,7 +9,7 @@ import utils
 
 
 class NEG_loss(nn.Module):
-    def __init__(self, type_offset, node_types, edge_types, embed_size, pre_train_path, graph_name = '', mode=1, weight_decay=0.001, directed=False):
+    def __init__(self, type_offset, node_types, edge_types, embed_size, pre_train_path, graph_name = '', mode=1, map_mode=0, weight_decay=0.001, directed=False):
         """
         :param num_classes: An int. The number of possible classes.
         :param embed_size: An int. EmbeddingLockup size
@@ -25,9 +25,11 @@ class NEG_loss(nn.Module):
         self.type_offset = []
         self.directed = directed
         self.mode = mode
+        self.map_mode = map_mode
         self.weight_decay = weight_decay
         for tp in node_types:
-            self.type_offset.append(type_offset[tp])
+            if tp in type_offset:
+                self.type_offset.append(type_offset[tp])
 
         self.edge_types = edge_types
         self.embed_size = embed_size
@@ -38,38 +40,19 @@ class NEG_loss(nn.Module):
         self.out_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
 
 
-        #self.add_module('in_emb', self.in_embed)
-        #self.add_module('out_emb', self.out_embed)
-        #self.add_module('edge_map', self.edge_mapping)
-
         self.out_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
         self.in_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
 
         if len(pre_train_path) > 0:
-            '''
-            in_mapping = cPickle.load(open('/shared/data/qiz3/data/' + graph_name +'in_mapping.p'))
-            with open(pre_train_path, 'r') as INPUT:
-                INPUT.readline()
-                for line in INPUT:
-                    node = line.strip().split(' ')
-                    _type, _id = node[0].split(':')
-                    _index = in_mapping[_type][_id] + self.type_offset[node_types.index(_type)]
-                    self.out_embed.weight.data[_index, :] = t.FloatTensor(map(lambda x:float(x), node[1:]))
-                    self.in_embed.weight.data[_index, :] = t.FloatTensor(map(lambda x:float(x), node[1:]))
-            '''
+
             self.in_embed.weight.data.copy_(t.from_numpy(pre_train_path))
             self.out_embed.weight.data.copy_(t.from_numpy(pre_train_path))
-            
-            #self.in_embed.weight.data.div_(10)
-            #self.out_embed.weight.data.div_(10)
-            
-	    #self.out_embed.weight.data.renorm_(p=2, dim=0, maxnorm=2)
-            #self.edge_mapping.append(nn.Linear(self.embed_size, self.embed_size, bias=False).cuda())
+
         
-        if self.mode != 0: 
+        if self.mode > 0: 
             for tp in edge_types:
                 self.edge_mapping.append(self.genMappingLayer(self.mode))
-                if self.mode == -1:
+                if self.map_mode > 0:
                     self.edge_mapping_bn.append(nn.BatchNorm1d(self.embed_size).cuda())
                 #if self.mode == -2:
                     #self.edge_mapping_bn.append(nn.Dropout().cuda())
@@ -89,29 +72,32 @@ class NEG_loss(nn.Module):
             _layer.weight = Parameter(t.eye(self.embed_size).view(-1, self.embed_size ** 2).cuda())
         return _layer
 
+    def edge_map(self, x, tp):
+        if self.map_mode == -1:
+            return x
+        elif self.map_mode == 0:
+            return self.edge_mapping[tp](x)
+        #batch normalization
+        elif self.map_mode == 1:
+            return self.edge_mapping[tp](x) if x.size()[0] == 1 else self.edge_mapping_bn[tp](self.edge_mapping[tp](x))
+        #batch normalization + ReLu
+        elif self.map_mode == 2:
+            return F.relu(self.edge_mapping[tp](x)) if x.size()[0] == 1 else F.relu(self.edge_mapping_bn[tp](self.edge_mapping[tp](x)))
 
-    def edge_rep(self, input_a, input_b, tp):
-        #mode 1: element-wise
+    def edge_rep(self, input_a, input_b):
+        #mode 1: hadamard-product
         #mode 2: outer-product
         #mode 3: deduction
         #mode 4: addition
         if self.mode == 1:
-            return self.edge_mapping[tp](input_a * input_b)
-        elif self.mode == -1:
-            if input_a.size()[0] == 1:
-                return F.relu(self.edge_mapping[tp](input_a * input_b))
-            else:
-                return F.relu(self.edge_mapping_bn[tp](self.edge_mapping[tp](input_a * input_b)))
-        #elif self.mode == -2:
-        #    return F.dropout(self.edge_mapping[tp](input_a * input_b), training=self.training)
-
+            return input_a * input_b
         elif self.mode == 2:
-            return self.edge_mapping[tp](t.bmm(input_a.unsqueeze(2), input_b.unsqueeze(1)).view(-1, self.embed_size ** 2) + 
-                t.bmm(input_b.unsqueeze(2), input_a.unsqueeze(1)).view(-1, self.embed_size ** 2) )
+            return t.bmm(input_a.unsqueeze(2), input_b.unsqueeze(1)).view(-1, self.embed_size ** 2) + 
+                t.bmm(input_b.unsqueeze(2), input_a.unsqueeze(1)).view(-1, self.embed_size ** 2)
         elif self.mode == 3:
-            return self.edge_mapping[tp]((input_a - input_b) ** 2)
+            return (input_a - input_b) ** 2
         elif self.mode == 4:
-            return self.edge_mapping[tp]((input_a + input_b) ** 2)
+            return (input_a + input_b) ** 2
         else:
             return input_a * input_b
     
@@ -193,14 +179,14 @@ class NEG_loss(nn.Module):
                 v_noise_input = self.in_embed(_v_noise).neg()
                 
                 
-                log_target_input = self.edge_rep(u_input, v_input, tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                log_target_output = self.edge_rep(u_output , v_output, tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                log_target_input = self.edge_map(self.edge_rep(u_input, v_input), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                log_target_output = self.edge_map(self.edge_rep(u_output , v_output), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
                 
-                sum_log_u_noise_v_input = self.edge_rep(u_noise_input.view(-1, self.embed_size), v_input.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                sum_log_u_noise_v_output = self.edge_rep(u_noise_output.view(-1, self.embed_size), v_output.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_noise_v_input = self.edge_map(self.edge_rep(u_noise_input.view(-1, self.embed_size), v_input.repeat(1, num_sampled).view(-1,self.embed_size)), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_noise_v_output = self.edge_map(self.edge_rep(u_noise_output.view(-1, self.embed_size), v_output.repeat(1, num_sampled).view(-1,self.embed_size)), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
 
-                sum_log_u_v_noise_input = self.edge_rep(v_noise_input.view(-1, self.embed_size), u_input.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                sum_log_u_v_noise_output = self.edge_rep(v_noise_output.view(-1, self.embed_size), u_output.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_v_noise_input = self.edge_map(self.edge_rep(v_noise_input.view(-1, self.embed_size), u_input.repeat(1, num_sampled).view(-1,self.embed_size)), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_v_noise_output = self.edge_map(self.edge_rep(v_noise_output.view(-1, self.embed_size), u_output.repeat(1, num_sampled).view(-1,self.embed_size)), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
                 
                 
                 
@@ -208,52 +194,21 @@ class NEG_loss(nn.Module):
                 reg_loss = (u_input.mul(u_input).sum() + v_output.mul(v_output).sum() + u_output.mul(u_output).sum() + v_input.mul(v_input).sum() + 
                 u_noise_input.mul(u_noise_input).sum() + u_noise_output.mul(u_noise_output).sum() + v_noise_input.mul(v_noise_input).sum() + v_noise_output.mul(v_noise_output).sum()) / 2
             else:
-                log_target = self.edge_rep(u_input, v_output, tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                sum_log_u_noise_v = self.edge_rep(u_noise_input.view(-1, self.embed_size), v_output.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
-                sum_log_u_v_noise = self.edge_rep(v_noise_output.view(-1, self.embed_size), u_input.repeat(1, num_sampled).view(-1,self.embed_size), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                log_target = self.edge_map(self.edge_rep(u_input, v_output), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_noise_v = self.edge_map(self.edge_rep(u_noise_input.view(-1, self.embed_size), v_output.repeat(1, num_sampled).view(-1,self.embed_size)), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
+                sum_log_u_v_noise = self.edge_map(self.edge_rep(v_noise_output.view(-1, self.embed_size), u_input.repeat(1, num_sampled).view(-1,self.embed_size)), tp).sum(1).squeeze().clamp(min=-6, max=6).sigmoid().log()
                 loss = 2 * log_target.sum() + sum_log_u_noise_v.sum() + sum_log_u_v_noise.sum()
                 reg_loss = u_input.mul(u_input).sum() + v_output.mul(v_output).sum() + u_noise_input.mul(u_noise_input).sum() + v_noise_output.mul(v_noise_output).sum()
 
-            #if tp != 1:
-
-
-            '''[batch_size * window_size, num_sampled, embed_size] * [batch_size * window_size, embed_size, 1] ->
-                [batch_size, num_sampled, 1] -> [batch_size] '''
-
-            #squeeze replace size 1
-            
-            #sum_log_sampled_u = ( self.edge_mapping[tp](noise*output.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size)).view(-1,self.embed_size)).sum(1).squeeze().sigmoid().log()
-            #temp = self.edge_rep(noise*output.repeat(1, num_sampled).view(sub_batch_size,num_sampled,self.embed_size), tp).view(-1,self.embed_size).sum(1).sigmoid()
-
-            
-            #sum_log_sampled_u = t.bmm(noise, output.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
-            #sum_log_sampled_v = t.bmm(cp_noise, input.unsqueeze(2)).sigmoid().log().sum(1).squeeze()
-
-             #+ input.norm(p=2, dim=1, keepdim=True).sum() + output.norm(p=2, dim=1, keepdim=True).sum() + noise.norm(p=2, dim=1, keepdim=True).sum() + cp_noise.norm(p=2, dim=1, keepdim=True).sum() + self.edge_mapping[tp].weight.norm(p=2, keepdim=True).sum()
             
             edge_reg_loss = 0.0
             if self.mode > 0:
                 edge_reg_loss += self.edge_mapping[tp].weight.mul(self.edge_mapping[tp].weight).sum()
             reg_loss += sub_batch_size * edge_reg_loss
-            #loss = log_target.sum() + sum_log_sampled_v.sum()
-            #loss = log_target + sum_log_sampled_v
-            #print(loss)
-            #loss_sum -= (loss - self.weight_decay * reg_loss)
-            #sub_loss.append((-loss + self.weight_decay * reg_loss) / (2 * sub_batch_size))
+
             loss_sum -= (loss - self.weight_decay * reg_loss)
             pure_loss -= loss
-            #print(loss, reg_loss)
-            #print(sub_batch_size)
-            #print('type :', tp, sub_batch_size, sum_log_sampled_u.sum(), sum_log_sampled_v.sum(), noise.mul(noise).sum(), cp_noise.mul(cp_noise).sum())
-            #print('Type is ', tp)
-            #print(input.norm(p=2, dim=1, keepdim=True).sum())
-            #print(output.norm(p=2, dim=1, keepdim=True).sum())
-            #if np.isnan(loss_sum[-1].data.cpu().numpy()):
-            #print('Type :', tp, temp.data.cpu().numpy().tolist())
-            #print(self.edge_mapping[tp].weight.data.cpu().numpy().tolist())
-        #print(sub_batch_size)
-        #assert sum(sub_batches) == batch_size
-        #return sub_loss, loss_sum
+
         return loss_sum / (2 * batch_size), pure_loss / (2 * batch_size)
 
     def predict(self, inputs, outputs, tp, directed = False):
@@ -270,10 +225,10 @@ class NEG_loss(nn.Module):
             u_output = self.out_embed(Variable(inputs))
             v_input = self.in_embed(Variable(outputs))
 
-            log_target = self.edge_rep(u_input, v_input, tp).sum(1).squeeze().sigmoid() + self.edge_rep(u_output, v_output, tp).sum(1).squeeze().sigmoid()
+            log_target = self.edge_map(self.edge_rep(u_input, v_input, tp)).sum(1).squeeze().sigmoid() + self.edge_map(self.edge_rep(u_output, v_output, tp)).sum(1).squeeze().sigmoid()
             log_target /= 2
         else:
-            log_target = self.edge_rep(u_input, v_output, tp).sum(1).squeeze().sigmoid()
+            log_target = self.edge_map(self.edge_rep(u_input, v_output, tp)).sum(1).squeeze().sigmoid()
         #log_target = (input * output).sum(1).squeeze().sigmoid()
         
         return log_target.data.cpu().numpy().tolist()
