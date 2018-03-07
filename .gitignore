@@ -3,3 +3,7 @@ archive/
 .DS_Store
 .idea/
 data/
+input_data/
+intermediate_data/
+log/
+output/
