@@ -3,19 +3,12 @@
 """
 Created on Fri Jan 19 12:39:34 2018
 
-@author: edz
+@author: Fang Guo
 """
 import numpy as np
-import sys
 import argparse
-
-parser = argparse.ArgumentParser(description="Read in input and output filenames.")
-parser.add_argument("--eval-file", nargs="?", help="Input evaluation filename.", type=str)
-parser.add_argument("--emb-file", nargs="?", help="Input embedding filename.", type=str)
-args = parser.parse_args()
-
-input_embedding=args.emb_file
-input_newfile=args.eval_file # '../input_data/dblp_0.1_out_20neg_eval.txt'
+import time
+import warnings
 
 def calculate_rr(batch):
     target=batch[0]
@@ -26,8 +19,18 @@ def calculate_rr(batch):
     return rr
 
 if __name__ == '__main__':
+    start_time = time.time()
+    parser = argparse.ArgumentParser(description="Read in input and output filenames.")
+    
+    parser.add_argument("--input-embedding", nargs="?", help="Input embedding filename.", type=str)
+   
+    parser.add_argument("--input-record", nargs="?", help="Input record filename.", type=str)
+    
+    parser.add_argument("--sample-number", nargs="?", help="Input sample number generated per node", type=int)
+    
+    args = parser.parse_args()
     embedding_dict={}
-    #input_embedding='dblp_0.1_out_line_samples1000_dim128.emb'
+    input_embedding=args.input_embedding
     with open(input_embedding, "r") as f_in:
         num_nodes, dim = map(int, f_in.readline().strip().split())  # first line is special
         count=0
@@ -37,18 +40,21 @@ if __name__ == '__main__':
             embedding_dict[line_split[0]] = np.asarray(a)
         assert len(embedding_dict) == num_nodes, "Number of nodes does not agree."
     print ("Embedding loading done.", num_nodes, "nodes with dim", dim, "from", input_embedding)
-    #input_newfile='test/file2.txt'
+    input_newfile=args.input_record
+    
     with open(input_newfile, "r") as f_in:
+        warnings.simplefilter('always', ImportWarning)
         count=0
         total_mrr={}
 
         exist=False
         rd=0
         checksametype=False
+        sample_number=args.sample_number
         for line in f_in:
             line_split = line.split(' ')
-            key1=line_split[0] #.lower()
-            key2=line_split[1] #.lower()
+            key1=line_split[0]
+            key2=line_split[1]
             #print(key1[0],key2[0])
             if count==0: 
                 current=[]
@@ -66,33 +72,57 @@ if __name__ == '__main__':
                             total_mrr[edge_type[::-1]]=[]
                     exist =True
                     target=embedding_dict[key1].dot(embedding_dict[key2])
-                    current.append(target) 
+                    current.append(float(target)) 
+                else:
+                    if key1 not in embedding_dict:
+                        warning_word=key1+' does not exist.'
+                        warnings.warn(warning_word)
+                    if key2 not in embedding_dict:
+                        warning_word=key2+' does not exist.'
+                        warnings.warn(warning_word)
                     #print(target)
                 count+=1
             else:
                 if exist:
                     if key1 in embedding_dict and key2 in embedding_dict:
-                        current.append(embedding_dict[key1].dot(embedding_dict[key2])) 
-                if count==10 and checksametype==False:
+                        current.append(float(embedding_dict[key1].dot(embedding_dict[key2]))) 
+                    else:
+                        if key1 not in embedding_dict:
+                            warning_word=key1+' does not exist.'
+                            warnings.warn(warning_word)
+                        if key2 not in embedding_dict:
+                            warning_word=key2+' does not exist.'
+                            warnings.warn(warning_word)
+                if count==sample_number and checksametype==False:
                     if exist:
                         edge_type=key1[0]+key2[0]
                         #print('10-',edge_type,current)
+                        print(current)
                         rr=calculate_rr(current)
-                        total_mrr[edge_type].append(rr) 
+                        total_mrr[edge_type].append(rr)
                         current=[]
-                        current.append(target)
-                if count==20:  
+                        current.append(float(target))
+                if count==(sample_number*2):  
                     if exist: 
                         edge_type=key1[0]+key2[0]
                         #print('20-',edge_type,current)
+                        print(current)
                         rr=calculate_rr(current)
-                        total_mrr[edge_type].append(rr) 
+                        total_mrr[edge_type].append(rr)
                         exist=False
                     checksametype=False
                     count=0
                     rd+=1
+                    if rd % 100000 == 0:
+                        elapsed_time = time.time() - start_time
+                        print(rd,' batchs finished with time',elapsed_time)
                 else:
                     count+=1
+            print (rd, "------------------------")
+            if rd == 10:
+                print(total_mrr)
+                break
+
         total=0
         num_mrr=0
         for key in total_mrr:
@@ -100,8 +130,8 @@ if __name__ == '__main__':
             l=len(total_mrr[key])
             total=total+s
             num_mrr=num_mrr+l
-            print ('edge is ',key,'with avg mrr ',s/l)
-        print ('# mrr is', num_mrr)
+            if l > 0:
+                print ('edge is ',key,'with avg mrr ',s/l)
         print ('total avg is', total/num_mrr)
             
  

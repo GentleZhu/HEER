@@ -68,14 +68,14 @@ if __name__ == '__main__':
                             total_mrr[edge_type[::-1]]=[]
                     exist=True
                     target=score_dict[key]
-                    current.append(target)
+                    current.append(float(target))
                     #print(target)
 
                 count+=1
             else:
                 if exist:
                     if key in score_dict:
-                        current.append(score_dict[key])
+                        current.append(float(score_dict[key]))
                 if count==10 and checksametype==False:
                     if exist:
                         edge_type=key1[0]+key2[0]
@@ -84,7 +84,7 @@ if __name__ == '__main__':
                         total_mrr[edge_type].append(rr)
 
                         current=[]
-                        current.append(target)
+                        current.append(float(target))
                 if count==20:
                     if exist:
                         edge_type=key1[0]+key2[0]
@@ -112,4 +112,5 @@ if __name__ == '__main__':
             num_mrr=num_mrr+l
 
             print ('edge is ',key,'with avg mrr ',s/l)
+        print ('# mrr is', num_mrr) 
         print ('total avg is', total/num_mrr)

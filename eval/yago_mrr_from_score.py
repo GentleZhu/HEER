@@ -15,7 +15,6 @@ def calculate_rr(batch):
     target=batch[0]
     l=sorted(batch,reverse=True)
     #l.sort(reverse=True)
-    #print(l)
     rank=l.index(target)+1
     rr=1/rank
     return rr
@@ -44,7 +43,6 @@ if __name__ == '__main__':
         total_mrr={}
         
         exist=False
-        checksametype=False
         sample_number=args.sample_number
 
         rd=0
@@ -58,51 +56,44 @@ if __name__ == '__main__':
             if count==0: 
                 current=[]
                 if key in score_dict:
-                    edge_type=key1[0]+key2[0]
-                    if edge_type==edge_type[::-1] :
-                        checksametype=True
-                        if edge_type not in total_mrr:
-                            total_mrr[edge_type]=[]
-                    else:
-                        if edge_type not in total_mrr:
-                            total_mrr[edge_type]=[]
-                        if edge_type[::-1] not in total_mrr:
-                            total_mrr[edge_type[::-1]]=[]
+                    edge_type=line_split[-1]
+                    edge_type_inverse=edge_type+'-1'
+                    if edge_type not in total_mrr:
+                        total_mrr[edge_type]=[]
+                    if edge_type_inverse not in total_mrr:
+                        total_mrr[edge_type_inverse]=[]
                     exist=True
                     target=score_dict[key]
-                    current.append(float(target) )
+                    current.append(float(target))
                     #print(target)
                 else:
                     warning_word=key+" does not exist."
                     warnings.warn(warning_word)
+                   
                 count+=1
             else:
                 if exist:
                     if key in score_dict:
-                        current.append(float(score_dict[key]) )
+                        current.append(float(score_dict[key]))
                     else:
                         warning_word=key+" does not exist."
                         warnings.warn(warning_word)
-                if count==sample_number and checksametype==False:
+                if count==sample_number:
                     if exist:
-                        edge_type=key1[0]+key2[0]
+                        edge_type=line_split[-1]
                         #print('10-',edge_type,current)
                         rr=calculate_rr(current)
                         total_mrr[edge_type].append(rr) 
-                        
                         current=[]
                         current.append(float(target))
                 if count==(sample_number*2):  
                     if exist: 
-                        edge_type=key1[0]+key2[0]
+                        edge_type=line_split[-1]
                         #print('20-',edge_type,current)
                         rr=calculate_rr(current)
-                        #print(rr)
                         total_mrr[edge_type].append(rr) 
                         exist=False
-                    checksametype=False
                     count=0
-                    
                     rd+=1
                     if rd % 100000 == 0:
                         elapsed_time = time.time() - start_time
@@ -122,6 +113,4 @@ if __name__ == '__main__':
             mrr_list.append(s/l)
             print ('edge is ',key,'with avg mrr ',s/l)
         print ('macro mrr is', np.mean(mrr_list))
-        print ('micro mrr is', total/num_mrr)
-        
- 
+        print ('micro mrr is', total/num_mrr) 

@@ -13,9 +13,8 @@ import warnings
 
 def calculate_rr(batch):
     target=batch[0]
-    l=sorted(batch,reverse=True)
-    #l.sort(reverse=True)
-    #print(l)
+    l=batch
+    l.sort(reverse=True)
     rank=l.index(target)+1
     rr=1/rank
     return rr
@@ -49,7 +48,7 @@ if __name__ == '__main__':
 
         rd=0
         for line in f_in:
-            line_split = line.strip().split()
+            line_split = line.split(' ')
             key1=line_split[0]
             key2=line_split[1]
             key=key1+' '+key2
@@ -70,16 +69,17 @@ if __name__ == '__main__':
                             total_mrr[edge_type[::-1]]=[]
                     exist=True
                     target=score_dict[key]
-                    current.append(float(target) )
+                    current.append(float(target)) 
                     #print(target)
                 else:
                     warning_word=key+" does not exist."
                     warnings.warn(warning_word)
+                   
                 count+=1
             else:
                 if exist:
                     if key in score_dict:
-                        current.append(float(score_dict[key]) )
+                        current.append(float(score_dict[key])) 
                     else:
                         warning_word=key+" does not exist."
                         warnings.warn(warning_word)
@@ -87,6 +87,7 @@ if __name__ == '__main__':
                     if exist:
                         edge_type=key1[0]+key2[0]
                         #print('10-',edge_type,current)
+                        print(current)
                         rr=calculate_rr(current)
                         total_mrr[edge_type].append(rr) 
                         
@@ -96,32 +97,34 @@ if __name__ == '__main__':
                     if exist: 
                         edge_type=key1[0]+key2[0]
                         #print('20-',edge_type,current)
+                        print(current)
                         rr=calculate_rr(current)
-                        #print(rr)
+                        
                         total_mrr[edge_type].append(rr) 
                         exist=False
                     checksametype=False
                     count=0
-                    
                     rd+=1
                     if rd % 100000 == 0:
                         elapsed_time = time.time() - start_time
                         print(rd,' batchs finished with time',elapsed_time)
                 else:
                     count+=1
+            print (rd, "------------------------")
+            if rd == 10:
+                print(total_mrr)
+                break
             
         total=0
         num_mrr=0
         
-        mrr_list = []
         for key in total_mrr:
             s=sum(total_mrr[key])
             l=len(total_mrr[key])
             total=total+s
             num_mrr=num_mrr+l
-            mrr_list.append(s/l)
+            
             print ('edge is ',key,'with avg mrr ',s/l)
-        print ('macro mrr is', np.mean(mrr_list))
-        print ('micro mrr is', total/num_mrr)
+        print ('total avg is', total/num_mrr)
         
  

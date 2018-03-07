@@ -12,8 +12,8 @@ import warnings
 
 def calculate_rr(batch):
     target=batch[0]
-    l=batch
-    l.sort(reverse=True)
+    l=sorted(batch, reverse=True)
+    #l.sort(reverse=True)
     rank=l.index(target)+1
     rr=1/rank
     return rr
@@ -52,7 +52,7 @@ if __name__ == '__main__':
         checksametype=False
         sample_number=args.sample_number
         for line in f_in:
-            line_split = line.split(' ')
+            line_split = line.strip().split()
             key1=line_split[0]
             key2=line_split[1]
             #print(key1[0],key2[0])
