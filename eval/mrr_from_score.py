@@ -34,6 +34,7 @@ if __name__ == '__main__':
             line_split = line.strip().split()
             key=line_split[0]+' '+line_split[1]
             score_dict[key]=float(line_split[2])
+        print('here')
         print(idx, num_positive_edges)
         assert idx/(2*negative_sample_number+1) == num_positive_edges, "Number of positive edges does not agree."
     print ("Loading done.", len(score_dict), "pairs from", input_scorefile)
