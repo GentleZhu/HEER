@@ -10,10 +10,11 @@ This repository provides a reference implementation of evalution of data accordi
 There are 2 required input files.
 1. **input-embedding-file** contains embedding result, they are in the format of:
 					
-		To be editted
+		edge vector//EX: P:20883 A:20345 [0.2, 1.2, -1.3, 0.8,...,0.2,-0.1]
    We also provide the **input-score-file** edtion in the folder, the score file should be in the format of:
    
-   		To be editted
+   		edge score// EX: P:20883 A:20345 0.88
+  
 	
 2. **input-eval-file** is the eval file that we generated from edge knockout process.
 
