@@ -25,6 +25,7 @@ for input_score_file_basename in os.listdir(input_score_dir):
                typed_node_pair_to_line_dict[typed_node_pair] = line
 
 with open(input_ref_file, "r") as f_in, open(output_file, "w") as f_out:
+    f_out.write(f_in.readline())  # copy the first line used for sanity check: num of neg smp & num of eval batches
     for line in f_in:
         line_split = line.strip().split()
         typed_node_pair = "|".join([line_split[0],line_split[1],line_split[3]])

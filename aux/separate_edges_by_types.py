@@ -11,6 +11,7 @@ output_dir = args.output_dir
 
 f_out_dict = {}
 with open(input_file, "r") as f_in:
+    f_in.readline()  # ignore the first line used for sanity check: num of neg smp & num of eval batches
     for line in f_in:
         _, __, ___, edge_type = line.strip().split()
 
