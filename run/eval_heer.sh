@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "To check eval .py script filename, revise line 34 acoordingly, and set default args.sample_number in this file." # to be done after Fang pushes
+echo "To check eval .py script filename, revise the last line acoordingly, and set default args.sample_number in this file." # to be done after Fang pushes
 
 time_start=$(date +"%Y%m%d_%H%M%S")
 
@@ -31,4 +31,4 @@ else
 fi
 output_file="$root_dir"/output/out_heer_"$network"_"$epoch"_"$operator"_"$map"_"$time_start".txt
 
-python3 "$root_dir"/eval/mrr_from_score.py --input-score-file $score_file --input-record-file $eval_file > "$output_file"
+python3 "$root_dir"/eval/mrr_from_score.py --input-score-file $score_file --input-eval-file $eval_file > "$output_file"
