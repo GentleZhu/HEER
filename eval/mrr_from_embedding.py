@@ -59,14 +59,12 @@ if __name__ == '__main__':
                 current=[]
                 if key1 in embedding_dict and key2 in embedding_dict:
                     edge_type=line_split[-1]
-                    edge_type_negative=edge_type[-1]+'-1'
-                    edge_type_reverse_negative=edge_type[::-1]+'-1'
+                    edge_type_reverse=edge_type[-1]+'-1'
                     if edge_type not in total_mrr:
                         total_mrr[edge_type]=[]
-                    if edge_type_negative not in total_mrr:
-                        total_mrr[edge_type_negative]=[]
-                    if edge_type_reverse_negative not in total_mrr:
-                        total_mrr[edge_type_reverse_negative]=[]
+                    if edge_type_reverse not in total_mrr:
+                        total_mrr[edge_type_reverse]=[]
+
                     exist =True
                     target=embedding_dict[key1].dot(embedding_dict[key2])
                     current.append(target) 

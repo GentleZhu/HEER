@@ -34,7 +34,7 @@ _All the commands are executed from the project home directory. And we are using
 
 Here is an exmaple of generating output files using embedding file:
 
-	python mrr_from_embedding
+	python mrr_from_embedding --input-embedding-file xxx.emb --input-eval-file xxx.txt
 
 ## Citing
 

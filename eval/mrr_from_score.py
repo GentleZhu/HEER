@@ -57,14 +57,11 @@ if __name__ == '__main__':
                 current=[]
                 if key in score_dict:
                     edge_type=key1[0]+key2[0]
-                    edge_type_negative=edge_type[-1]+'-1'
-                    edge_type_reverse_negative=edge_type[::-1]+'-1'
+                    edge_type_reverse=edge_type[-1]+'-1'
                     if edge_type not in total_mrr:
                         total_mrr[edge_type]=[]
-                    if edge_type_negative not in total_mrr:
-                        total_mrr[edge_type_negative]=[]
-                    if edge_type_reverse_negative not in total_mrr:
-                        total_mrr[edge_type_reverse_negative]=[]
+                    if edge_type_reverse not in total_mrr:
+                        total_mrr[edge_type_reverse ]=[]
                     exist=True
                     target=score_dict[key]
                     current.append(float(target) )
