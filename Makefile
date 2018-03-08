@@ -7,5 +7,8 @@ LOGDIR = ./log
 
 all: 
 	mkdir -p $(INPUTDIR) $(INTMEDIR) $(MODELDIR) $(PERTYPEDIR) $(OUTPUTDIR) $(LOGDIR)
+	$(MAKE) -C pretrain/
 
-# intentionally omitted make clean to avoid accidentally deleting all data
+clean: # intentionally omitted make clean to avoid accidentally deleting all data
+	$(MAKE) -C pretrain/ clean
+
