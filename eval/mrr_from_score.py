@@ -59,8 +59,8 @@ if __name__ == '__main__':
             if count==0: 
                 current=[]
                 if key in score_dict:
-                    edge_type=key1[0]+key2[0]
-                    edge_type_reverse=edge_type[-1]+'-1'
+                    edge_type=line_split[-1]
+                    edge_type_reverse=edge_type+'-1'
                     if edge_type not in total_mrr:
                         total_mrr[edge_type]=[]
                     if edge_type_reverse not in total_mrr:
@@ -82,19 +82,15 @@ if __name__ == '__main__':
                         warnings.warn(warning_word)
                 if count==sample_number:
                     if exist:
-                        edge_type=key1[0]+key2[0]
-                        #print('10-',edge_type,current)
+                        edge_type=line_split[-1]
                         rr=calculate_rr(current)
                         total_mrr[edge_type].append(rr) 
-                        
                         current=[]
                         current.append(float(target))
                 if count==(sample_number*2):  
                     if exist: 
-                        edge_type=key1[0]+key2[0]
-                        #print('20-',edge_type,current)
+                        edge_type=line_split[-1]
                         rr=calculate_rr(current)
-                        #print(rr)
                         total_mrr[edge_type].append(rr) 
                         exist=False
                     #checksametype=False

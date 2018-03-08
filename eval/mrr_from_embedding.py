@@ -61,7 +61,7 @@ if __name__ == '__main__':
                 current=[]
                 if key1 in embedding_dict and key2 in embedding_dict:
                     edge_type=line_split[-1]
-                    edge_type_reverse=edge_type[-1]+'-1'
+                    edge_type_reverse=edge_type+'-1'
                     if edge_type not in total_mrr:
                         total_mrr[edge_type]=[]
                     if edge_type_reverse not in total_mrr:
