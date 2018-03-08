@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "To check eval .py script filename, revise the last line acoordingly, and set default args.sample_number in this file." # to be done after Fang pushes
-
 time_start=$(date +"%Y%m%d_%H%M%S")
 
 # find relative root directory
@@ -29,6 +27,6 @@ else
 	echo "File $fast_eval_file does not exist. Using non-fast version for evaluation."
 	eval_file="$root_dir"/input_data/"$network"_eval.txt
 fi
-output_file="$root_dir"/output/out_heer_"$network"_"$epoch"_"$operator"_"$map"_"$time_start".txt
+output_file="$root_dir"/out_heer_"$network"_"$epoch"_"$operator"_"$map"_"$time_start".txt
 
 python3 "$root_dir"/eval/mrr_from_score.py --input-score-file $score_file --input-eval-file $eval_file > "$output_file"
