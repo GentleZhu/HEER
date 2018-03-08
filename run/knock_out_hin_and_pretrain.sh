@@ -11,7 +11,7 @@ script_dir="$( dirname "$SOURCE" )"
 root_dir="$( dirname $script_dir )"
 
 # input variables
-input_hin=$1  # a.k.a. graph_name; e.g., yago_0.2_out
+input_hin=$1  # the path to the complete HIN with format of knocked_out_hin_file
 hin_name=$2
 ko_rate=$3
 if (( $# == 4 )); then
