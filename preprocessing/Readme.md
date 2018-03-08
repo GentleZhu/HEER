@@ -10,9 +10,13 @@ This repository provides a reference implementation of edge reconstruction for H
 There are 1 required input files.
 1. **HIN-file** contains the edges of the HIN:
 					
-		node_type_1:node_value_1 node_type_2:node_value_2 edge_weight edge_type
+		node_name_1 node_name_2 edge_weight edge_type
 					
-	Note that edge_weight=0 means the edge does not exist.
+	Note that node name is in the format of :
+		
+		node_type:node_value//P:20993
+	
+	and edge_weight=0 means the edge does not exist.
 	
 			
 And another 5 required input datas:
@@ -37,7 +41,7 @@ There will be 2 files generated. First file is named as
 
 It contains edges from the input network without the kicked out edges and it is in the format of:
 
-	node_name node_name weight edgetype
+	node_name_1 node_name_2 weight edgetype
 	
    For edgetype, it is in the format of "node1node2"
 		
@@ -47,7 +51,7 @@ And the second file is named as
 
 It contains edges that being kickout out and the new generated edges with ko-rate. It is in the format of:
 
-	node_name node_name weight edgetype
+	node_name_1 node_name_2 weight edgetype
 
    For edge type, if it truely exists in the network, then it is in the format of **'node1node2'**; if it is 
    
