@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# e.g.: ./knock_out_hin_and_pretrain.sh ../input_data/dblp_full.hin dblp 0.1
+# e.g.: ./knock_out_hin_and_pretrain.sh ../input_data/yago_original.hin yago 0.1
 
 # find relative root directory
 SOURCE="${BASH_SOURCE[0]}"
@@ -38,7 +38,6 @@ knocked_out_hin_file_for_line="$knocked_out_hin_file".temp
 line_emb="$root_dir"/intermediate_data/line_"$hin_name"_ko_"$ko_rate".emb
 
 # knock out HIN
-python3 "$root_dir"/preprocessing/XXXASF!@RDFQWR!@DFASFZXV.py sdfas # to do after Fang pushes
 python3 "$root_dir"/preprocessing/ko_hin.py --input-hin-file "$input_hin" --data-set-name "$hin_name" --path-output "$root_dir"/input_data --ko-rate "$ko_rate"
 
 # down sample eval file to generate the fast version
