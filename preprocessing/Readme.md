@@ -8,7 +8,7 @@ This repository provides a reference implementation of edge reconstruction for H
 #### Input
 
 There are 1 required input files.
-1. **HIN-file** contains the edges of the HIN:
+1. **input-hin-file** contains the edges of the HIN:
 					
 		node_name_1 node_name_2 edge_weight edge_type
 					
@@ -18,7 +18,7 @@ There are 1 required input files.
 	
 	For example: P:20883
 			
-And another 3 required input arguments and 2 optional arguments:
+And another 3 required input arguments and 2 optional input arguments:
 
 1. **ko-rate** stands for the knockout rate. It is float type. For example, 0.1 means you will knock out 10% of the original edges.
 
