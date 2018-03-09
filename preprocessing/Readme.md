@@ -42,8 +42,6 @@ There will be 2 files generated. **First file** is named as
 It contains edges from the input network without the kicked out edges and it is in the format of:
 
 	node_name_1 node_name_2 weight edgetype
-	
-   For edgetype, it is in the format of "node1node2"
 		
 And the **second file** is named as 
 		
@@ -53,9 +51,8 @@ It contains edges that being kickout out and the new generated edges with ko-rat
 
 	node_name_1 node_name_2 weight edgetype
 
-   For edge type, if it truely exists in the network, then it is in the format of **'node1node2'**; if it is 
-   
-   generated and not exists in the network, then it is in the format of **'node1node2-1'**
+   For one edgetype 'xxx', its reverse value will be marked as 'xxx-1'. For example, one edge type is '<hasChild>', 
+   then its reverse value will be '<hasChild>-1'
 		
    And the first line of **second file** contain the basic information as :
 	
