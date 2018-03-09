@@ -16,7 +16,7 @@ There are 1 required input files.
 		
 		node_type:node_value
 	
-	For example: **P:20883**	
+	For example: P:20883
 			
 And another 3 required input arguments and 2 optional arguments:
 
