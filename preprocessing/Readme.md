@@ -14,8 +14,9 @@ There are 1 required input files.
 					
 	Note that node name is in the format of :
 		
-		node_type:node_value//P:20993
+		node_type:node_value
 	
+	For example: **P:20883**
 	and edge_weight=0 means the edge does not exist.
 	
 			
