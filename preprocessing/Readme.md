@@ -26,7 +26,7 @@ And another 5 required input datas:
 2. **sample-number** stands for the number of new edges you want to generate. It is int type. For exmaple, with knocked out edge AB, sample number =10 means you will generate 10 new edges with fixed node A and another 10 edges with fixed node B.
    Then default sample number =10
 
-3. **dataset-name** is the name that the output files will use as prefix. It is string type. For example, if the dataset-name is 'DBLP' then the output fils will be named as 'DBLP_xxx'. The default name is 'unknown'.
+3. **dataset-name** is the name that the output files will use as prefix. It is string type. For example, if the dataset-name is 'dblp' then the output fils will be named as 'dblp_xxx'. The default name is 'unknown'.
 
 4. **path-output** is the path that the generator will put files to. It is string type. The dafault value is '.'.
 
