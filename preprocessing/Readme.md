@@ -50,10 +50,10 @@ The **second file** is named as
 
 The first line of **second file** contains the basic information as :
 	
-	#of_negative_example_per_direction_in_one_batch #total batches.
+	#_of_negative_example_per_direction_in_one_batch #_of_total_batches.
 
 Note that one Batch has (1+**sample-number***2) edges, the fisrt edge in the batch is the edge that has been knocked out from 
-**input-hin-file**, then the following **sample-number***2 edges are ones that being generated from this knocked out edge. 
+**input-hin-file**, then the following **sample-number***2 node pairs that are not associated by edges with respect to this  knocked out edge. 
 The detailed generating rule is explaned in our paper.
 
 Each edge is in the format of:
