@@ -12,7 +12,7 @@ There are 1 required input files.
 					
 		node_name_1 node_name_2 edge_weight edge_type
 					
-	Note that node name is in the format of :
+	Note that node_name_1 and node_name_2 are in the format of :
 		
 		node_type:node_value
 	
