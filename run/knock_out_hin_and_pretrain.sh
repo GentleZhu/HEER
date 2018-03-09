@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# e.g.: ./knock_out_hin_and_pretrain.sh ../input_data/dblp_full.hin dblp 0.1
+
 # find relative root directory
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -23,19 +25,21 @@ else
 			num_edge_smp=100000
 		else
 			echo "Sampling 100000 edges for pretrain using LINE. This variable can be specified as the fourth argument."
+			num_edge_smp=100000
 		fi
 	fi
 fi
 
 # files
-knocked_out_hin_file="$root_dir"/input_data/"hin_name"_"ko_rate"_out.net
-eval_file="$root_dir"/input_data/"hin_name"_"ko_rate"_out_eval.txt
-fast_eval_file="$root_dir"/input_data/"hin_name"_"ko_rate"_out_eval_fast.txt
+knocked_out_hin_file="$root_dir"/input_data/"$hin_name"_ko_"$ko_rate".hin
+eval_file="$root_dir"/input_data/"$hin_name"_ko_"$ko_rate"_eval.txt
+fast_eval_file="$root_dir"/input_data/"$hin_name"_ko_"$ko_rate"_eval_fast.txt
 knocked_out_hin_file_for_line="$knocked_out_hin_file".temp
-line_emb="$root_dir"/intermediate_data/line_"hin_name"_"ko_rate"_out.emb
+line_emb="$root_dir"/intermediate_data/line_"$hin_name"_ko_"$ko_rate".emb
 
 # knock out HIN
 python3 "$root_dir"/preprocessing/XXXASF!@RDFQWR!@DFASFZXV.py sdfas # to do after Fang pushes
+python3 "$root_dir"/preprocessing/ko_hin.py --input-hin-file "$input_hin" --data-set-name "$hin_name" --path-output "$root_dir"/input_data --ko-rate "$ko_rate"
 
 # down sample eval file to generate the fast version
 python2 "$root_dir"/aux/downsample_eval_file.py --input-file "$eval_file" --output-file "$fast_eval_file"
