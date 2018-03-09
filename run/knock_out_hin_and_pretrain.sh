@@ -46,7 +46,7 @@ python2 "$root_dir"/aux/downsample_eval_file.py --input-file "$eval_file" --outp
 
 # pretrain by LINE
 awk '{print $1, $2, $3}' "$knocked_out_hin_file" > "$knocked_out_hin_file_for_line"
-"$root_dir"/pretrain/line -train "$knocked_out_hin_file_for_line" -output "$line_emb" -size 128 -order 1 -negative 5 -samples "$num_edge_smp"
+"$root_dir"/pretrain/line -train "$knocked_out_hin_file_for_line" -output "$line_emb" -size 128 -order 1 -negative 5 -samples "$num_edge_smp" -threads 10
 rm "$knocked_out_hin_file_for_line"
 
 
