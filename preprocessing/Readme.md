@@ -61,7 +61,7 @@ Each edge is in the format of:
 	node_name_1 node_name_2 weight edgetype
 
    For one edgetype 'xxx', its reverse type will be marked as 'xxx-1'. For example, one edge type is 'hasChild', 
-   then its reverse edge will be 'hasChild-1'
+   then its reverse edge will be 'hasChild-1'.
 		
 							
 #### Execute and example
