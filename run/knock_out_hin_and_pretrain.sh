@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# e.g.: source knock_out_hin_and_pretrain.sh ../input_data/yago_original.hin yago 0.1
+# e.g.: ./knock_out_hin_and_pretrain.sh ../input_data/yago_original.hin yago 0.1
 
 # find relative root directory
 SOURCE="${BASH_SOURCE[0]}"
@@ -45,7 +45,7 @@ python2 "$root_dir"/aux/downsample_eval_file.py --input-file "$eval_file" --outp
 
 # pretrain by LINE
 awk '{print $1, $2, $3}' "$knocked_out_hin_file" > "$knocked_out_hin_file_for_line"
-source "$root_dir"/pretrain/line -train "$knocked_out_hin_file_for_line" -output "$line_emb" -size 128 -order 1 -negative 5 -samples "num_edge_smp"
+"$root_dir"/pretrain/line -train "$knocked_out_hin_file_for_line" -output "$line_emb" -size 128 -order 1 -negative 5 -samples "num_edge_smp"
 rm "$knocked_out_hin_file_for_line"
 
 

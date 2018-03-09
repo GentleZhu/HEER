@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# e.g.: source eval_heer.sh yago_ko_0.1 10 diag bn
+# e.g.: ./eval_heer.sh yago_ko_0.1 10 diag bn
 
 time_start=$(date +"%Y%m%d_%H%M%S")
 
