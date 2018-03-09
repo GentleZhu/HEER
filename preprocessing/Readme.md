@@ -68,7 +68,7 @@ It is in the format of:
 		
 							
 #### Execute and example
-And we are using python3._<br/> 
+And we are using python3.<br/> 
 
 Here is an exmaple of generating output files
 
