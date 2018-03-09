@@ -53,7 +53,8 @@ The first line of **second file** contains the basic information as :
 	#of_negative_example_per_direction_in_one_batch #total batches.
 
 One Batch has (1+**sample-number***2) edges, the fisrt edge in the batch is the edge that has been knocked out from 
-**input-hin-file**, then we will generate **sample-number***2 edges from this knocked out edge. 
+**input-hin-file**, then the following **sample-number***2 edges are ones that being generated from this knocked out edge. 
+The detailed generating rule is explaned in the paper.
 
 It is in the format of:
 
