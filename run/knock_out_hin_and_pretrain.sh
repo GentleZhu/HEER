@@ -17,11 +17,12 @@ input_hin=$1  # the path to the complete HIN with format of knocked_out_hin_file
 hin_name=$2
 ko_rate=$3
 if (( $# == 4 )); then
-	num_edge_smp=$4  # number of edges sampled by LINE
+	num_edge_smp=$4  # number of million edges sampled by LINE
 else
-	if [[ $hin = *"yago"* ]]; then
+	if [[ "$hin_name" = *"yago"* ]]; then
 		num_edge_smp=10000
-		if [[ $hin = *"dblp"* ]]; then
+	else
+		if [[ "$hin_name" = *"dblp"* ]]; then
 			num_edge_smp=100000
 		else
 			echo "Sampling 100000 edges for pretrain using LINE. This variable can be specified as the fourth argument."
