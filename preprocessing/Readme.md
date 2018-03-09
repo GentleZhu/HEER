@@ -7,7 +7,7 @@ This repository provides a reference implementation of edge reconstruction for H
 
 #### Input
 
-There are 1 required input files.
+There are **1** required input files.
 1. **input-hin-file** is the file containing all edges of the input HIN, it should be in the format of :
 					
 		node_name_1 node_name_2 edge_weight edge_type
@@ -18,7 +18,7 @@ There are 1 required input files.
 	
 	For example: P:20883
 			
-And another 3 required input arguments:
+And another **3** required input arguments:
 
 1. **ko-rate** stands for the knockout rate. It is float type. For example, 0.1 means you will knock out 10% of the original edges.
 
@@ -26,7 +26,7 @@ And another 3 required input arguments:
 
 3.  **path-output** is the path that the generator will put files to. It is in string type. 
 
-And another 2 optional input arguments:
+And another **2** optional input arguments:
 
 1. (optional)**sample-number** stands for the number of new edges you want to generate. It is int type. For exmaple, with knocked out edge AB, sample number =10 means you will generate 10 new edges with fixed node A and another 10 edges with fixed node B. Thn default sample number =10
 
