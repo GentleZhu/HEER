@@ -16,9 +16,7 @@ There are 1 required input files.
 		
 		node_type:node_value
 	
-	For example: **P:20883**
-	and edge_weight=0 means the edge does not exist.
-	
+	For example: **P:20883**	
 			
 And another 5 required input datas:
 
