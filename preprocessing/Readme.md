@@ -8,7 +8,7 @@ This repository provides a reference implementation of edge reconstruction for H
 #### Input
 
 There are 1 required input files.
-1. **input-hin-file** contains the edges of the HIN:
+1. **input-hin-file** is the file has all edges of the input HIN, it should be in the format of :
 					
 		node_name_1 node_name_2 edge_weight edge_type
 					
