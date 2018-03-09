@@ -6,3 +6,5 @@ input_data/
 intermediate_data/
 log/
 output/
+pretrain/line
+*.o

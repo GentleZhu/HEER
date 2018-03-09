@@ -22,7 +22,7 @@ output_eval = args.output_file
 neg_size = args.neg_size
 sample_number = args.sample_number
 
-input_eval_file_len = len_file()
+input_eval_file_len = len_file(input_eval)
 smp_rate = 1.*sample_number/input_eval_file_len
 
 with open(input_eval, "r") as f_in_eval, open(output_eval, "w") as f_out_eval:
