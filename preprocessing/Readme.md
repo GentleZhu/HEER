@@ -35,7 +35,7 @@ And another 5 required input datas:
 
 #### Output
 
-There will be 2 files generated. First file is named as 
+There will be 2 files generated. **First file** is named as 
 		
 	dataset-name_ko_ko-rate.hin
 
@@ -45,7 +45,7 @@ It contains edges from the input network without the kicked out edges and it is 
 	
    For edgetype, it is in the format of "node1node2"
 		
-And the second file is named as 
+And the **second file** is named as 
 		
 	dataset-name_ko_ko-rate_eval.txt
 
@@ -57,15 +57,14 @@ It contains edges that being kickout out and the new generated edges with ko-rat
    
    generated and not exists in the network, then it is in the format of **'node1node2-1'**
 		
-   And the first line of second file contain the basic information as :
+   And the first line of **second file** contain the basic information as :
 	
-	#of negative example per direction in one batch, #total batches.
+	#of_negative_example_per_direction_in_one_batch #total batches.
 
 		
 							
 #### Execute and example
-
-_All the commands are executed from the project home directory. And we are using python3._<br/> 
+And we are using python3._<br/> 
 
 Here is an exmaple of generating output files
 
