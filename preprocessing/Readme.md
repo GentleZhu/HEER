@@ -35,7 +35,8 @@ And another **2** optional input arguments:
 
 #### Output
 
-There will be 2 files generated. **First file** is named as 
+There will be 2 files generated. 
+**First file** is named as 
 		
 	dataset-name_ko_ko-rate.hin
 
@@ -47,7 +48,7 @@ And the **second file** is named as
 		
 	dataset-name_ko_ko-rate_eval.txt
 
-It contains edges that being kickout out and the new generated edges with ko-rate. It is in the format of:
+It contains edges that being kickout out and 20 new generated edges from them. It is in the format of:
 
 	node_name_1 node_name_2 weight edgetype
 
