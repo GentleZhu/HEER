@@ -48,16 +48,21 @@ And the **second file** is named as
 		
 	dataset-name_ko_ko-rate_eval.txt
 
-It contains edges that being kickout out and 20 new generated edges from them. It is in the format of:
+The first line of **second file** contains the basic information as :
+	
+	#of_negative_example_per_direction_in_one_batch #total batches.
+
+One Batch has (1+**sample-number***2) edges, the fisrt edge in the batch is the edge that has been knocked out from 
+**input-hin-file**, then we will generate **sample-number***2 edges from this knocked out edge. 
+
+It is in the format of:
 
 	node_name_1 node_name_2 weight edgetype
 
    For one edgetype 'xxx', its reverse value will be marked as 'xxx-1'. For example, one edge type is '<hasChild>', 
    then its reverse value will be '<hasChild>-1'
 		
-   And the first line of **second file** contain the basic information as :
-	
-	#of_negative_example_per_direction_in_one_batch #total batches.
+   
 
 		
 							
