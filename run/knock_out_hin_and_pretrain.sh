@@ -36,7 +36,7 @@ knocked_out_hin_file="$root_dir"/input_data/"$hin_name"_ko_"$ko_rate".hin
 eval_file="$root_dir"/input_data/"$hin_name"_ko_"$ko_rate"_eval.txt
 fast_eval_file="$root_dir"/input_data/"$hin_name"_ko_"$ko_rate"_eval_fast.txt
 knocked_out_hin_file_for_line="$knocked_out_hin_file".temp
-line_emb="$root_dir"/intermediate_data/line_"$hin_name"_ko_"$ko_rate".emb
+pretrained_emb="$root_dir"/intermediate_data/pretrained_"$hin_name"_ko_"$ko_rate".emb
 
 # knock out HIN
 python3 "$root_dir"/preprocessing/ko_hin.py --input-hin-file "$input_hin" --data-set-name "$hin_name" --path-output "$root_dir"/input_data --ko-rate "$ko_rate"
@@ -46,7 +46,7 @@ python2 "$root_dir"/aux/downsample_eval_file.py --input-file "$eval_file" --outp
 
 # pretrain by LINE
 awk '{print $1, $2, $3}' "$knocked_out_hin_file" > "$knocked_out_hin_file_for_line"
-"$root_dir"/pretrain/line -train "$knocked_out_hin_file_for_line" -output "$line_emb" -size 128 -order 1 -negative 5 -samples "$num_edge_smp" -threads 10
+"$root_dir"/pretrain/line -train "$knocked_out_hin_file_for_line" -output "$pretrained_emb" -size 128 -order 1 -negative 5 -samples "$num_edge_smp" -threads 10
 rm "$knocked_out_hin_file_for_line"
 
 
