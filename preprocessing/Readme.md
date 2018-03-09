@@ -18,18 +18,19 @@ There are 1 required input files.
 	
 	For example: **P:20883**	
 			
-And another 5 required input datas:
+And another 3 required input arguments and 2 optional arguments:
 
 1. **ko-rate** stands for the knockout rate. It is float type. For example, 0.1 means you will knock out 10% of the original edges.
 
-2. **sample-number** stands for the number of new edges you want to generate. It is int type. For exmaple, with knocked out edge AB, sample number =10 means you will generate 10 new edges with fixed node A and another 10 edges with fixed node B.
-   Then default sample number =10
+2. **dataset-name** is the name that the output files will use as prefix. It is in string type. For example, if the dataset-name is 'dblp' then the output fils will be named as 'dblp_xxx'. 
 
-3. **dataset-name** is the name that the output files will use as prefix. It is string type. For example, if the dataset-name is 'dblp' then the output fils will be named as 'dblp_xxx'. The default name is 'unknown'.
+3.  **path-output** is the path that the generator will put files to. It is in string type. 
 
-4. **path-output** is the path that the generator will put files to. It is string type. The dafault value is '.'.
+And 2 optional input arguments:
 
-5. **buffer-size** is the size of temporary trunk for output saving. The default value is 500000.
+1. (optional)**sample-number** stands for the number of new edges you want to generate. It is int type. For exmaple, with knocked out edge AB, sample number =10 means you will generate 10 new edges with fixed node A and another 10 edges with fixed node B. Thn default sample number =10
+
+2. (optional)**buffer-size** is the size of temporary trunk for output saving. The default buffer-size = 500000.
 
 
 #### Output
