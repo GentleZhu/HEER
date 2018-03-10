@@ -25,12 +25,24 @@ sample_number = args.sample_number
 input_eval_file_len = len_file(input_eval)
 smp_rate = 1.*sample_number/input_eval_file_len
 
+lines_to_write = []
 with open(input_eval, "r") as f_in_eval, open(output_eval, "w") as f_out_eval:
-    f_out_eval.write(f_in_eval.readline())
+    first_line = f_in_eval.readline()
+    lines_to_write.append(first_line)  # the number of batches is to be updated
+
+    neg_size_from_file, num_batches_from_file = map(int, first_line.strip().split())
+    assert neg_size == neg_size_from_file
+
+    new_num_batches = 0
     cur_batch = ""
     for idx, line in enumerate(f_in_eval):
         cur_batch += line
         if (idx + 1) % (2 * neg_size + 1) == 0:
             if random.random() < smp_rate:
-                f_out_eval.write(cur_batch)
+                lines_to_write.append(cur_batch)
+                new_num_batches += 1
             cur_batch = ""
+    assert (idx + 1)/(2*neg_size + 1) == num_batches_from_file, "Number of positive edges does not agree."
+
+    lines_to_write[0] = str(neg_size) + " " + str(new_num_batches) + "\n"
+    f_out_eval.writelines(lines_to_write)
