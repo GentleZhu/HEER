@@ -7,65 +7,65 @@ This repository provides a reference implementation of edge reconstruction for H
 
 #### Input
 
-There are 1 required input files.
-1. **HIN-file** contains the edges of the HIN:
+There are **1** required input file.
+1. **input-hin-file** is the file containing all edges of the input HIN, it should be in the format of :
 					
 		node_name_1 node_name_2 edge_weight edge_type
 					
-	Note that node name is in the format of :
+	Note that node_name_1 and node_name_2 are in the format of :
 		
-		node_type:node_value//P:20993
+		node_type:node_value
 	
-	and edge_weight=0 means the edge does not exist.
-	
+	For example: P:20883
 			
-And another 5 required input datas:
+With another **3** required input arguments:
 
-1. **ko-rate** stands for the knockout rate. It is float type. For example, 0.1 means you will knock out 10% of the original edges.
+1. **ko-rate** stands for the knockout rate. It is a float. For example, 0.1 means you will knock out 10% of the original edges.
 
-2. **sample-number** stands for the number of new edges you want to generate. It is int type. For exmaple, with knocked out edge AB, sample number =10 means you will generate 10 new edges with fixed node A and another 10 edges with fixed node B.
-   Then default sample number =10
+2. **dataset-name** is the name that the output files will use as prefix. It is a string. For example, if the dataset-name is 'dblp' then the output fils will be named as 'dblp_xxx'. 
 
-3. **dataset-name** is the name that the output files will use as prefix. It is string type. For example, if the dataset-name is 'DBLP' then the output fils will be named as 'DBLP_xxx'. The default name is 'unknown'.
+3.  **path-output** is the path that the generator will put files to. It is a string. 
 
-4. **path-output** is the path that the generator will put files to. It is string type. The dafault value is '.'.
+And another **2** optional input arguments:
 
-5. **buffer-size** is the size of temporary trunk for output saving. The default value is 500000.
+1. (optional)**sample-number** stands for the number of new edges you want to generate. It is aa integer. For exmaple, with knocked out edge AB, sample number =10 means you will generate 10 new edges with fixed node A and another 10 edges with fixed node B. Thn default sample number =10
+
+2. (optional)**buffer-size** is the size of temporary trunk for output saving. It is an integer. The default buffer-size = 500000.
 
 
 #### Output
 
-There will be 2 files generated. First file is named as 
+There will be 2 files generated. 
+**First file** is named as 
 		
 	dataset-name_ko_ko-rate.hin
 
-It contains edges from the input network without the kicked out edges and it is in the format of:
+It contains all the edges from **input-hin-file** without the kicked out edges and it is in the format of:
 
 	node_name_1 node_name_2 weight edgetype
-	
-   For edgetype, it is in the format of "node1node2"
 		
-And the second file is named as 
+The **second file** is named as 
 		
 	dataset-name_ko_ko-rate_eval.txt
 
-It contains edges that being kickout out and the new generated edges with ko-rate. It is in the format of:
+The first line of **second file** contains the basic information as :
+	
+	#_of_negative_example_per_direction_in_one_batch #_of_total_batches.
+
+Note that one Batch has (1+**sample-number***2) edges, the fisrt edge in the batch is the edge that has been knocked out from 
+**input-hin-file**, then the following **sample-number***2 node pairs that are not associated by edges with respect to this  knocked out edge. 
+The detailed generating rule is explaned in our paper.
+
+Each edge is in the format of:
 
 	node_name_1 node_name_2 weight edgetype
 
-   For edge type, if it truely exists in the network, then it is in the format of **'node1node2'**; if it is 
-   
-   generated and not exists in the network, then it is in the format of **'node1node2-1'**
-		
-   And the first line of second file contain the basic information as :
-	
-	#of negative example per direction in one batch, #total batches.
-
+   For one edgetype 'xxx', its reverse type will be marked as 'xxx-1'. For example, one edge type is 'hasChild', 
+   then its reverse edge will be 'hasChild-1'.
 		
 							
 #### Execute and example
-
-_All the commands are executed from the project home directory. And we are using python3._<br/> 
+And we are using python3.<br/> 
 
 Here is an exmaple of generating output files
 
