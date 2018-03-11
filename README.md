@@ -3,6 +3,8 @@
 ```
 source /shared/data/qiz3/qiz3/bin/activate
 bash ./src/run.sh
+bash ./src/run.sh yago_ko_0.4 20 1 0 yago 7
+bash ./src/eval.sh yago_ko_0.4 20 1 0 yago 7
 ```
 
 ## specifications
@@ -17,7 +19,8 @@ operator:
 	
 mapping function:
 
-	1. linear mapping
-	2. linear mappng with batch norm
-	3. lienar mapping + batch norm + ReLu
-	4. FC + batch norm + ReLu + FC + batch norm
+	-1. unimetric
+	0. linear mappng with batch norm
+	1. linear mappng with batch norm
+	2. linear mappng with batch norm + ReLU
+	3. fully connected mappng with batch norm
