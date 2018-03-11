@@ -49,7 +49,7 @@ class NEG_loss(nn.Module):
             self.out_embed.weight.data.copy_(t.from_numpy(pre_train_path))
 
         
-        if self.mode > 0: 
+        if self.map_mode > -1: 
             for tp in edge_types:
                 self.edge_mapping.append(self.genMappingLayer(self.mode))
                 if self.map_mode > 0:
@@ -92,8 +92,7 @@ class NEG_loss(nn.Module):
         if self.mode == 1:
             return input_a * input_b
         elif self.mode == 2:
-            return t.bmm(input_a.unsqueeze(2), input_b.unsqueeze(1)).view(-1, self.embed_size ** 2) + 
-                t.bmm(input_b.unsqueeze(2), input_a.unsqueeze(1)).view(-1, self.embed_size ** 2)
+            return t.bmm(input_a.unsqueeze(2), input_b.unsqueeze(1)).view(-1, self.embed_size ** 2) + t.bmm(input_b.unsqueeze(2), input_a.unsqueeze(1)).view(-1, self.embed_size ** 2)
         elif self.mode == 3:
             return (input_a - input_b) ** 2
         elif self.mode == 4:
@@ -134,8 +133,6 @@ class NEG_loss(nn.Module):
             #print(indices)
             if len(indices) == 0:
                 continue
-            #make sure here
-            assert tp != 11
             sub_batch_size = indices.size()[0]
             #sub_batches.append(sub_batch_size)
 
@@ -202,7 +199,7 @@ class NEG_loss(nn.Module):
 
             
             edge_reg_loss = 0.0
-            if self.mode > 0:
+            if self.map_mode >= 0:
                 edge_reg_loss += self.edge_mapping[tp].weight.mul(self.edge_mapping[tp].weight).sum()
             reg_loss += sub_batch_size * edge_reg_loss
 
@@ -225,10 +222,10 @@ class NEG_loss(nn.Module):
             u_output = self.out_embed(Variable(inputs))
             v_input = self.in_embed(Variable(outputs))
 
-            log_target = self.edge_map(self.edge_rep(u_input, v_input, tp)).sum(1).squeeze().sigmoid() + self.edge_map(self.edge_rep(u_output, v_output, tp)).sum(1).squeeze().sigmoid()
+            log_target = self.edge_map(self.edge_rep(u_input, v_input), tp).sum(1).squeeze().sigmoid() + self.edge_map(self.edge_rep(u_output, v_output), tp).sum(1).squeeze().sigmoid()
             log_target /= 2
         else:
-            log_target = self.edge_map(self.edge_rep(u_input, v_output, tp)).sum(1).squeeze().sigmoid()
+            log_target = self.edge_map(self.edge_rep(u_input, v_output), tp).sum(1).squeeze().sigmoid()
         #log_target = (input * output).sum(1).squeeze().sigmoid()
         
         return log_target.data.cpu().numpy().tolist()

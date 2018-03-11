@@ -13,8 +13,8 @@ class HinLoader(object):
 		for k in arg['types']:
 			self.in_mapping[k] = dict()
 			self.out_mapping[k] = dict()
-		print(self.in_mapping.keys())
-		print(self.out_mapping.keys())
+		#print(self.in_mapping.keys())
+		#print(self.out_mapping.keys())
 
 	def inNodeMapping(self, key, type):
 		if key not in self.in_mapping[type]:
@@ -23,23 +23,21 @@ class HinLoader(object):
 
 		return self.in_mapping[type][key]
 
-	def readHin(self):
+	def readHin(self, _edge_types):
 		#num_nodes = defaultdict(int)
 		with open(self.arg['graph']) as INPUT:
 			for line in INPUT:
 				edge = line.strip().split(' ')
+				edge_type = _edge_types.index(edge[-1])
 				node_a = edge[0].split(':')
 				node_b = edge[1].split(':')
 				node_a_type = self.arg['types'].index(node_a[0])
 				node_b_type = self.arg['types'].index(node_b[0])
-				edge_type = self.arg['edge_types'].index((node_a_type, node_b_type))
+				#assert edge_type != 11
 				self.edge_stat[edge_type] += 1
-				assert edge_type > -1
+				assert [node_a_type, node_b_type] == self.arg['edge_types'][edge_type]
 				self.input.append([edge_type, self.inNodeMapping(node_a[1], node_a[0])])
 				self.output.append([self.arg['types'].index(node_b[0]), self.inNodeMapping(node_b[1], node_b[0])])
-				#self.input.append([self.arg['types'].index(node_a[0]), self.arg['types'].index(node_b[0]), self.inNodeMapping(node_a[1], node_a[0]), self.inNodeMapping(node_b[1], node_b[0])])
-				#self.graph[(node_a[0], node_b[0])].append((self.inNodeMapping(node_a[1], node_a[0]), self.inNodeMapping(node_b[1], node_b[0])))
-		#print(map(lambda x:len(x), self.in_mapping))
 	
 	def encode(self):
 		self.encoder = dict()
@@ -57,9 +55,9 @@ class HinLoader(object):
 
 	def dump(self, dump_path):
 		print(self.edge_stat)
-		cPickle.dump(self.encoder, open(dump_path + 'offset.p', 'wb'))
-		cPickle.dump(self.input, open(dump_path + 'input.p', 'wb'))
-		cPickle.dump(self.output, open(dump_path + 'output.p', 'wb'))
-		cPickle.dump(self.in_mapping, open(dump_path + 'in_mapping.p', 'wb'))
-		cPickle.dump(self.out_mapping, open(dump_path + 'out_mapping.p', 'wb'))
-		cPickle.dump(self.edge_stat, open(dump_path + 'edge_stat.p', 'wb'))
+		cPickle.dump(self.encoder, open(dump_path + '_offset.p', 'wb'))
+		cPickle.dump(self.input, open(dump_path + '_input.p', 'wb'))
+		cPickle.dump(self.output, open(dump_path + '_output.p', 'wb'))
+		cPickle.dump(self.in_mapping, open(dump_path + '_in_mapping.p', 'wb'))
+		cPickle.dump(self.out_mapping, open(dump_path + '_out_mapping.p', 'wb'))
+		cPickle.dump(self.edge_stat, open(dump_path + '_edge_stat.p', 'wb'))
