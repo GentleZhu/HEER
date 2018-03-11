@@ -20,10 +20,10 @@ def calculate_rr(batch):
             num_less += 1
         if s > target:
             num_grtr += 1
-    rank = ((num_grtr+1) + (len(batch)-num_less))/2.
+    rr_list = map(lambda x: 1./x, range(num_grtr+1, len(batch)-num_less+1))
     # l=sorted(batch,reverse=True)
     # rank=l.index(target)+1
-    rr = 1./rank
+    rr = sum(rr_list) / len(rr_list)
     return rr
 
 if __name__ == '__main__':
