@@ -22,7 +22,7 @@ def calculate_rr(batch):
     rr_list = map(lambda x: 1./x, range(num_grtr+1, len(batch)-num_less+1))
     # l=sorted(batch,reverse=True)
     # rank=l.index(target)+1
-    rr = sum(rr_list) / len(rr_list)
+    rr = sum(rr_list) / (len(batch) - num_less - num_grtr)
     return rr
 
 if __name__ == '__main__':
