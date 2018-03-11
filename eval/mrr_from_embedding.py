@@ -10,12 +10,19 @@ import argparse
 import time
 import warnings
 
+
 def calculate_rr(batch):
     target=batch[0]
-    l=sorted(batch,reverse=True)
-    #l.sort(reverse=True)
-    rank=l.index(target)+1
-    rr=1/rank
+    num_less, num_grtr = 0, 0
+    for s in batch:
+        if s < target:
+            num_less += 1
+        if s > target:
+            num_grtr += 1
+    rank = ((num_grtr+1) + (len(batch)-num_less))/2.
+    # l=sorted(batch,reverse=True)
+    # rank=l.index(target)+1
+    rr = 1./rank
     return rr
 
 if __name__ == '__main__':
