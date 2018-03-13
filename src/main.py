@@ -84,7 +84,7 @@ def learn_embeddings():
 		'window_size':1, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':5,
 		'graph_name':args.graph_name, 'dump_timer':args.dump_timer, 'model_dir':args.model_dir,
 		'data_dir':args.data_dir, 'mode':args.op, 'map_mode':args.map_func,
-		'lr_ratio':16, 'lr': 2.5, 'network':_network,
+		'lr_ratio':16, 'lr': 1.0, 'network':_network,
 		'pre_train':_data, 'node_types':config['nodes'], 'edge_types':config['edges']})
 	
 

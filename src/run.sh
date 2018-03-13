@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#e.g. bash ./src/run.sh yago_ko_0.4 0 1 -1 yago 7
+#e.g. bash ./src/run.sh yago_ko_0.4 20 1 0 yago 7
 
 green=`tput setaf 2`
 red=`tput setaf 1`
@@ -25,11 +25,6 @@ done
 script_dir="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 root_dir="$( dirname $script_dir )"
 
-DATA_DIR=/shared/data/qiz3/data/
-MODEL_DIR=/shared/data/qiz3/data/model/
-#GRAPH_NAME=yago_0.4_out_
-GRAPH_NAME=dblp_0.4_out_
-SUFFIX=_input.p
 
 echo ${green}===Constructing Training Net===${reset}
 if [ ! -e  "$root_dir"/intermediate_data/"$network$SUFFIX" ]; then
@@ -38,7 +33,7 @@ if [ ! -e  "$root_dir"/intermediate_data/"$network$SUFFIX" ]; then
 		--graph-name=$network --data-dir="$root_dir"/intermediate_data/ --config="$root_dir"/input_data/"$config".config
 fi
 echo ${red}===HEER Training===${reset}
-#python main.py --iter=21 --batch-size=128 --dimensions=128  --graph-name=$GRAPH_NAME --data-dir=$DATA_DIR --model-dir=$MODEL_DIR \
-#--pre-train-path=/shared/data/yushi2/edge_rep_codes/intermediate_data/dblp_0.4_out_line_samples50000_alpha0.1_dim128.emb \
-#--dump-timer=2 --map_func=$MAP_FUNC --op=$OP --gpu=1
+python ./src/main.py --iter=$2 --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/model/ \
+--pre-train-path="$root_dir"/intermediate_data/pretrained_"$network".emb \
+--dump-timer=2 --map_func=$map --op=$operator --gpu=$gpu --config="$root_dir"/input_data/"$config".config
 

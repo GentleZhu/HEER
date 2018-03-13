@@ -51,7 +51,7 @@ def parse_args():
                       help='Number of epochs in SGD')
 	parser.add_argument('--op', default=0, type=int)
 	parser.add_argument('--map_func', default=0, type=int)
-	parser.add_argument('--fast', default=True, type=bool)
+	parser.add_argument('--fast', default=1, type=int)
 	parser.add_argument('--dump-timer', default=5, type=int)
 
 	parser.add_argument('--weighted', dest='weighted', action='store_true',
@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
 	type_offset = cPickle.load(open(args.data_dir + args.graph_name + '_offset.p'))
 	model = neg.NEG_loss(type_offset=type_offset, node_types=config['nodes'], edge_types=config['edges'], 
-		embed_size=args.dimensions, pre_train_path=_data, graph_name=args.graph_name, 
+		embed_size=args.dimensions, pre_train_path=_data, m=args.graph_name, 
 		mode=args.op, map_mode=args.map_func)
 	
 
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 		model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
 						'_mode_' + str(args.map_func)+ '.pt'
 		print('model path:',model_path)
-		xxx = t.load(model_path, map_location='cpu')
+		xxx = t.load(model_path) #, map_location='cpu')
 		#print('after')
 		model.load_state_dict(xxx, False )
 		#print(model.parameters())
@@ -107,7 +107,7 @@ if __name__ == '__main__':
 	
 	print("Model Mode:", args.op)
 	#pred_types = [0, 1, 2, 3, 4]
-	suffix = '_' + args.graph_name + '_eval_fast.txt' if args.fast else '_eval.txt'
+	suffix = '_' + args.graph_name + ('_eval_fast.txt' if args.fast == 1 else '_eval.txt')
 
 	in_mapping = cPickle.load(open(args.data_dir + args.graph_name +'_in_mapping.p'))
 	for idx, i in enumerate(config['types']):

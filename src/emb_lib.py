@@ -29,12 +29,12 @@ class SkipGram(object):
 		self.dump_timer = arg['dump_timer']
 		self.model_dir = arg['model_dir']
 		#enable batch normalization
-		if self.map_mode == 0:
+		if self.map_mode != -1:
 			_params = [{'params': self.neg_loss.in_embed.parameters()}, 
 				{'params': self.neg_loss.out_embed.parameters()}]
 			for i in xrange(len(self.neg_loss.edge_mapping)):
 				_params.append({'params': self.neg_loss.edge_mapping[i].parameters(),
-					#'lr': arg['lr']})
+					#'lr': arg['lr'] * 1})
 					'lr': arg['lr'] * arg['lr_ratio'] * (float(len(self.input))) / (type_offset['sum'] * edge_stats[i] + 1e-6)})
 			self.SGD = optim.SGD(_params, lr = arg['lr'])
 			#self.edge_lr_ratio = arg['lr_ratio']
@@ -71,11 +71,11 @@ class SkipGram(object):
 					
 					loss.backward()
 					
-					utils.clip_sparse_grad_norm(self.neg_loss.in_embed.parameters(), 0.1)
-					utils.clip_sparse_grad_norm(self.neg_loss.out_embed.parameters(), 0.1)
+					#utils.clip_sparse_grad_norm(self.neg_loss.in_embed.parameters(), 0.1)
+					#utils.clip_sparse_grad_norm(self.neg_loss.out_embed.parameters(), 0.1)
 					
-					for i in xrange(len(self.neg_loss.edge_mapping)):
-						utils.clip_grad_norm(self.neg_loss.edge_mapping[i].parameters(), 0.1)
+					#for i in xrange(len(self.neg_loss.edge_mapping)):
+					#	utils.clip_grad_norm(self.neg_loss.edge_mapping[i].parameters(), 0.1)
 
 					self.SGD.step()
 					

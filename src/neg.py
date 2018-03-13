@@ -9,7 +9,7 @@ import utils
 
 
 class NEG_loss(nn.Module):
-    def __init__(self, type_offset, node_types, edge_types, embed_size, pre_train_path, graph_name = '', mode=1, map_mode=0, weight_decay=0.001, directed=False):
+    def __init__(self, type_offset, node_types, edge_types, embed_size, pre_train_path, graph_name = '', mode=1, map_mode=0, weight_decay=0.0, directed=False):
         """
         :param num_classes: An int. The number of possible classes.
         :param embed_size: An int. EmbeddingLockup size
@@ -64,8 +64,12 @@ class NEG_loss(nn.Module):
     def genMappingLayer(self, mode):
         _layer = None
         if mode != 2:
-            _layer = utils.DiagLinear(self.embed_size).cuda()
-            _layer.weight = Parameter(t.FloatTensor(self.embed_size).fill_(1.0).cuda())
+            if self.map_mode < 3: 
+                _layer = utils.DiagLinear(self.embed_size).cuda()
+                _layer.weight = Parameter(t.FloatTensor(self.embed_size).fill_(1.0).cuda())
+            else:
+                _layer = nn.Linear(self.embed_size, self.embed_size).cuda()
+                _layer.weight = Parameter(t.FloatTensor(self.embed_size, self.embed_size).fill_(1.0 / self.embed_size).cuda())
         elif mode == 2:
             _layer = utils.SymmLinear(self.embed_size).cuda()
             #_layer.weight = Parameter(t.FloatTensor(self.embed_size * self.embed_size).fill_(1.0).cuda())
@@ -78,7 +82,7 @@ class NEG_loss(nn.Module):
         elif self.map_mode == 0:
             return self.edge_mapping[tp](x)
         #batch normalization
-        elif self.map_mode == 1:
+        elif self.map_mode == 1 or self.map_mode == 3:
             return self.edge_mapping[tp](x) if x.size()[0] == 1 else self.edge_mapping_bn[tp](self.edge_mapping[tp](x))
         #batch normalization + ReLu
         elif self.map_mode == 2:
