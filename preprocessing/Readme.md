@@ -15,8 +15,16 @@ There are **1** required input file.
 	Note that node_name_1 and node_name_2 are in the format of :
 		
 		node_type:node_value
-	
+		
 	For example: P:20883
+		
+	And also if edge is directed, edge_type should be in the format of:
+	
+		edge_value:d 
+		
+	Otherwise it is in the format of 
+	
+		edge_value:u
 			
 With another **3** required input arguments:
 
@@ -35,8 +43,8 @@ And another **2** optional input arguments:
 
 #### Output
 
-There will be 2 files generated. 
-**First file** is named as 
+There will be 3 files generated. 
+**first file** is named as:
 		
 	dataset-name_ko_ko-rate.hin
 
@@ -44,7 +52,7 @@ It contains all the edges from **input-hin-file** without the kicked out edges a
 
 	node_name_1 node_name_2 weight edgetype
 		
-The **second file** is named as 
+**second file** is named as:
 		
 	dataset-name_ko_ko-rate_eval.txt
 
@@ -62,8 +70,23 @@ Each edge is in the format of:
 
    For one edgetype 'xxx', its reverse type will be marked as 'xxx-1'. For example, one edge type is 'hasChild', 
    then its reverse edge will be 'hasChild-1'.
-		
-							
+   
+**third file**	is name as	
+	
+	dataset-name.config
+				
+It contains following informaton:
+The first line is a list of edges, each edge is also a list of left node index and right node index. They are in string type. For example:
+
+	
+	
+The second line is a list of node indexes starting from 0. They are in string type. For example:
+
+	
+The third line is a list of edge indexes starting from 0. They are in string type. For example:
+
+	
+The fourth line is a list of each edge's directed contion. 
 #### Execute and example
 And we are using python3.<br/> 
 
