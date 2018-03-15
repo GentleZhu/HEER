@@ -71,7 +71,7 @@ Each edge is in the format of:
    For one edgetype 'xxx', its reverse type will be marked as 'xxx-1'. For example, one edge type is 'hasChild', 
    then its reverse edge will be 'hasChild-1'.
    
-**third file**	is name as	
+**third file**	is named as	
 	
 	dataset-name.config
 				
