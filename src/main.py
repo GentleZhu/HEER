@@ -1,22 +1,26 @@
 import argparse
 import numpy as np
 from emb_lib import SkipGram
-import yago_network as nx
+import network as nx
 import torch as t
 import cPickle
 import utils
 import torch.utils.data as tdata
 
-YaGo_types = [(5, 2), (5, 5), (5, 2), (5, 2), (6, 1), (5, 5), (5, 3), (5, 1), (5, 3), (5, 7), (5, 2), (5, 4), (5, 1), (3, 1), (5, 3), 
-		(5, 1), (1, 1), (5, 0), (1, 1), (5, 1), (5, 1), (5, 5), (5, 5), (5, 2), (5, 5)]
-YaGo_nodes = ['PR', 'AD', 'WO', 'AS', 'GE', 'PE', 'EV', 'PO']
+global config
+
+DBLP_types = [(1,0),(1,1),(1,2),(1,3),(1,4)]
+DBLP_nodes = ['A','P','Y','W','V']
 def parse_args():
 	'''
-	Parses the node2vec arguments.
+	Parses the heer arguments.
 	'''
-	parser = argparse.ArgumentParser(description="Run node2vec.")
+	parser = argparse.ArgumentParser(description="Run heer.")
 
-	parser.add_argument('--input', nargs='?', default='graph/karate.edgelist',
+	parser.add_argument('--config', nargs='?', 
+	                    help='Configuration file of input network')
+
+	parser.add_argument('--input', nargs='?',
 	                    help='Input graph path')
 
 	parser.add_argument('--gpu', nargs='?', default='0',
@@ -72,16 +76,16 @@ def learn_embeddings():
 	'''
 	Learn embeddings by optimizing the Skipgram objective using SGD.
 	'''
-
-	_data = utils.load_emb(args.pre_train_path, args.dimensions, args.graph_name, YaGo_nodes)
-	_network = tdata.TensorDataset(t.LongTensor(cPickle.load(open(args.data_dir + args.graph_name + 'input.p'))), 
-                               t.LongTensor(cPickle.load(open(args.data_dir + args.graph_name + 'output.p'))))
+	print(config)
+	_data = utils.load_emb(args.data_dir, args.pre_train_path, args.dimensions, args.graph_name, config['nodes'])
+	_network = tdata.TensorDataset(t.LongTensor(cPickle.load(open(args.data_dir + args.graph_name + '_input.p'))), 
+                               t.LongTensor(cPickle.load(open(args.data_dir + args.graph_name + '_output.p'))))
 	model = SkipGram({'emb_size':args.dimensions,
 		'window_size':1, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':5,
 		'graph_name':args.graph_name, 'dump_timer':args.dump_timer, 'model_dir':args.model_dir,
 		'data_dir':args.data_dir, 'mode':args.op, 'map_mode':args.map_func,
-		'lr_ratio':16, 'lr': 2.5, 'network':_network,
-		'pre_train':_data, 'node_types':YaGo_nodes, 'edge_types':YaGo_types})
+		'lr_ratio':16, 'lr': 1.0, 'network':_network,
+		'pre_train':_data, 'node_types':config['nodes'], 'edge_types':config['edges']})
 	
 
 	model.train()
@@ -92,10 +96,12 @@ def main(args):
 	'''
 	Pipeline for representational learning for all nodes in a graph.
 	'''
+	global config
+	config = utils.read_config(args.config)
 	if args.build_graph:
 		#print(args.node_types)
-		tmp = nx.HinLoader({'graph': args.input, 'types':YaGo_nodes, 'edge_types':YaGo_types})
-		tmp.readHin()
+		tmp = nx.HinLoader({'graph': args.input, 'types':config['nodes'], 'edge_types':config['edges']})
+		tmp.readHin(config['types'])
 		tmp.encode()
 		tmp.dump(args.data_dir + args.graph_name)
 		#print(args.edge_types)

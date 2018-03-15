@@ -5,72 +5,122 @@ import sys
 import neg
 import argparse
 import torch.utils.data as tdata
+import utils
 from tqdm import tqdm
 
 def parse_args():
 	'''
-	Parses the node2vec arguments.
+	Parses the heer arguments.
 	'''
-	parser = argparse.ArgumentParser(description="Run node2vec.")
+	parser = argparse.ArgumentParser(description="Run heer.")
+
+	parser.add_argument('--config', nargs='?', 
+	                    help='Configuration file of input network')
+
+	parser.add_argument('--input', nargs='?', default='graph/karate.edgelist',
+	                    help='Input graph path')
 
 	parser.add_argument('--gpu', nargs='?', default='0',
 	                    help='Embeddings path')
 
+	parser.add_argument('--dimensions', type=int, default=128,
+	                    help='Number of dimensions. Default is 128.')
+	
+	parser.add_argument('--batch-size', type=int, default=50,
+	                    help='Batch size. Default is 50.')
+
+	parser.add_argument('--window-size', type=int, default=1,
+                    	help='Context size for optimization. Default is 10.')
+
+	parser.add_argument('--pre-train-path', type=str, default='',
+                    	help='embedding initialization')
+
+	parser.add_argument('--build-graph', type=bool, default=False,
+                    	help='heterogeneous information network construction')
 
 	parser.add_argument('--graph-name', type=str, default='',
                     	help='prefix of dumped data')
+	parser.add_argument('--data-dir', type=str, default='',
+                    	help='data directory')
+	parser.add_argument('--model-dir', type=str, default='',
+                    	help='model directory')
+	parser.add_argument('--test-dir', type=str, default='',
+                    	help='test directory')
 
-	parser.add_argument('--node-types', type=list, default=['a', 'p', 'w', 'v', 'y', 'cp'])
+	parser.add_argument('--iter', default=500, type=int,
+                      help='Number of epochs in SGD')
+	parser.add_argument('--op', default=0, type=int)
+	parser.add_argument('--map_func', default=0, type=int)
+	parser.add_argument('--fast', default=1, type=int)
+	parser.add_argument('--dump-timer', default=5, type=int)
 
-	parser.add_argument('--edge-types', type=list, default=[(1,0),(1,1),(1,2),(1,3),(1,4)])
+	parser.add_argument('--weighted', dest='weighted', action='store_true',
+	                    help='Boolean specifying (un)weighted. Default is unweighted.')
+	parser.add_argument('--unweighted', dest='unweighted', action='store_false')
+	parser.set_defaults(weighted=False)
 
-	parser.add_argument('--pred-type', type=int)
-
-	parser.add_argument('--model-name', type=str)
-
-	parser.add_argument('--test-dir', type=str)
-
-	parser.add_argument('--out-dir', type=str)
-
-	parser.add_argument('--batch-size', type=int, default=1000,
-	                    help='Batch size. Default is 50.')
-
-
+	parser.add_argument('--directed', dest='directed', action='store_true',
+	                    help='Graph is (un)directed. Default is undirected.')
+	parser.add_argument('--undirected', dest='undirected', action='store_false')
+	parser.set_defaults(directed=False)
 
 	return parser.parse_args()
 
 if __name__ == '__main__':
 	args = parse_args()
-	arg = {'emb_size':128, 'window_size':1, 'batch_size':128, 'iter':10, 'neg_ratio':5, 'graph_name':'dblp_0.5_',
-       'pre_train_path':'/shared/data/yushi2/edge_rep_codes/intermediate_data/dblp_0.5_out_line_samples200000_alpha0.1_dim128.emb',
-       'node_types':['A','P','Y','W','V'], 'edge_types':[(1,0),(1,1),(1,2),(1,3),(1,4)], 'gpu':0, 'lr':2.5, 'mode':0}
-	t.cuda.set_device(int(arg['gpu']))
+	arg = {}
+	_data = ''
+	config = utils.read_config(args.config)
+	#config['nodes'] = ['PR', 'AD', 'WO', 'AS', 'GE', 'PE', 'EV', 'PO']
+	#config['edges'] = [(5, 2), (5, 5), (5, 2), (5, 2), (6, 1), (5, 5), (5, 3), (5, 1), (5, 3), (5, 7), (5, 2), (5, 4), (5, 1), (3, 1), (5, 3), (5, 1), (1, 1), (5, 0), (1, 1), (5, 1), (5, 1), (5, 5), (5, 5), (5, 2), (5, 5)]
+
+	# baseline score
+	if args.map_func == -1:
+		_data = utils.load_emb(args.data_dir, args.pre_train_path, args.dimensions, args.graph_name, config['nodes'])
+		args.op = 1
+	#print(_data)
+	t.cuda.set_device(int(args.gpu))
 	
-	type_offset = cPickle.load(open('/shared/data/qiz3/data/' + arg['graph_name'] + 'offset.p'))
-	model = neg.NEG_loss(type_offset=type_offset, node_types=arg['node_types'], edge_types=arg['edge_types'], embed_size=arg['emb_size'], pre_train_path='', graph_name=arg['graph_name'], mode=arg['mode'])
-	#model.mode = 0
-	model.load_state_dict(t.load('/shared/data/qiz3/data/model/' +  args.model_name +'.pt'))
+
+	type_offset = cPickle.load(open(args.data_dir + args.graph_name + '_offset.p'))
+	model = neg.NEG_loss(type_offset=type_offset, node_types=config['nodes'], edge_types=config['edges'], 
+		embed_size=args.dimensions, pre_train_path=_data, m=args.graph_name, 
+		mode=args.op, map_mode=args.map_func)
 	
-	#print("Model Mode:", model.mode)
-	pred_types = [0, 1, 2, 3, 4]
-	suffix = '_dblp_0.5_out_20neg_eval_fast.txt'
-	in_mapping = cPickle.load(open('/shared/data/qiz3/data/' + arg['graph_name'] +'in_mapping.p'))
-	for idx, i in enumerate(pred_types):
+
+	
+	#print(model.in_embed.weight.sum())
+	if args.map_func != -1:
+		model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
+						'_mode_' + str(args.map_func)+ '.pt'
+		print('model path:',model_path)
+		xxx = t.load(model_path) #, map_location='cpu')
+		#print('after')
+		model.load_state_dict(xxx, False )
+		#print(model.parameters())
+
+	#model.load_state_dict(t.load('/shared/data/qiz3/data/model/' +  args.model_name +'.pt'))
+	#print(model.in_embed.weight.sum())
+	#for el in model.edge_mapping:
+	#	print(el, el.weight.data.cpu().numpy().tolist())
+	#sys.exit(-1)
+	
+	print("Model Mode:", args.op)
+	#pred_types = [0, 1, 2, 3, 4]
+	suffix = '_' + args.graph_name + ('_eval_fast.txt' if args.fast == 1 else '_eval.txt')
+
+	in_mapping = cPickle.load(open(args.data_dir + args.graph_name +'_in_mapping.p'))
+	for idx, i in enumerate(config['types']):
 		edge_prefix = []
-		if arg['edge_types'][idx][0] == arg['edge_types'][idx][1]:
-			edge_prefix.append(arg['node_types'][arg['edge_types'][idx][0]] + arg['node_types'][arg['edge_types'][idx][1]])
-		else:
-			edge_prefix += (arg['node_types'][arg['edge_types'][idx][0]] + arg['node_types'][arg['edge_types'][idx][1]],
-				arg['node_types'][arg['edge_types'][idx][1]] + arg['node_types'][arg['edge_types'][idx][0]])
-	#tp = int(args.pred_type)
-		print("Edge Type:", i)
+		edge_prefix += (i, i+'-1')
+		print("Edge Type:", idx)
 		print(edge_prefix)
 	
 	#for el in model.edge_mapping:
 	#	print(el, el.weight.data.cpu().numpy().tolist())
 	#sys.exit(-1)
 
-		tp = i
+		tp = idx
 	#APYWV
 		for prefix in edge_prefix:
 			with open(args.test_dir + prefix + suffix, 'r') as INPUT:
@@ -85,8 +135,12 @@ if __name__ == '__main__':
 					_input.append(in_mapping[_type_a][_id_a] + type_offset[_type_a])
 					_output.append(in_mapping[_type_b][_id_b] + type_offset[_type_b])
 					#else:
+						#print(line)
 					#	continue
 
+			if len(_input) == 0:
+				print("no this type! in test")
+				continue
 			input_data = tdata.TensorDataset(t.LongTensor(_input), t.LongTensor(_output))
 			print(len(input_data))
 			
@@ -96,15 +150,19 @@ if __name__ == '__main__':
 			#pbar = tqdm(total=len(data_reader) / args.batch_size)
 			for i, data in enumerate(data_reader, 0):
 				inputs, labels = data
-				loss = model.predict(inputs, labels, tp)
+				loss = model.predict(inputs, labels, tp, config['edges'][idx][0] == config['edges'][idx][1])
 				score += loss
 				#pbar.update(1)
 			#pbar.close()
 
-			with open(args.test_dir + prefix + suffix, 'r') as INPUT, open(args.out_dir + prefix + suffix, 'w') as OUTPUT:
+			with open(args.test_dir + prefix + suffix, 'r') as INPUT, open(args.test_dir + prefix + suffix.replace('eval', 'pred'), 'w') as OUTPUT:
 				for i, line in enumerate(INPUT):
 					node = line.strip().split(' ')
+					_type_a, _id_a = node[0].split(':')
+					_type_b, _id_b = node[1].split(':')
+					assert _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]
 					node[2] = str(score[i])
 					OUTPUT.write(' '.join(node) + '\n')
+				#assert cnt == len(score)
 			
 

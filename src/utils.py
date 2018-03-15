@@ -3,10 +3,20 @@ import torch.nn as nn
 from torch.nn import Parameter
 import numpy as np
 import cPickle
+import ast
 
-def load_emb(emb_path, emb_size, graph_name, node_types):
-    in_mapping = cPickle.load(open('/shared/data/qiz3/data/' + graph_name +'in_mapping.p'))
-    type_offset = cPickle.load(open('/shared/data/qiz3/data/' + graph_name + 'offset.p'))
+def read_config(conf_name):
+    config = {}
+    with open(conf_name) as IN:
+        config['edges'] = ast.literal_eval(IN.readline())
+        config['nodes'] = ast.literal_eval(IN.readline())
+        config['types'] = ast.literal_eval(IN.readline())
+    assert len(config['edges']) == len(config['types'])
+    return config
+
+def load_emb(root_dir, emb_path, emb_size, graph_name, node_types):
+    in_mapping = cPickle.load(open(root_dir + graph_name +'_in_mapping.p'))
+    type_offset = cPickle.load(open(root_dir  + graph_name + '_offset.p'))
     with open(emb_path, 'r') as INPUT:
         _data = np.zeros((type_offset['sum'], emb_size))
         print(type_offset)
