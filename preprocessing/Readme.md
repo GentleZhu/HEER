@@ -76,10 +76,14 @@ Each edge is in the format of:
 	dataset-name.config
 				
 It contains following informaton:
-The first line is a list of edge type, each edge type is represented as a list of left node index and right node index; The second line is a list of node indexes starting from 0. They are in string type; The third line is a list of edge indexes starting from 0. They are in string type; The fourth line is a list of each edge's directed contion. For example, we might have this sample config file DBLP.config as:
-
+The first line is a list of edge type, each edge type is represented as a list of left node index and right node index; The second line is a list of node indexes starting from 0. They are in string type; The third line is a list of edge indexes starting from 0. They are in string type; The fourth line is a list of each edge's directed contion. Therefore, we might have this sample config file DBLP.config as:
 	
+	[[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]]
+	['P', 'Y', 'W', 'A', 'V']
+	['PP', 'PY', 'PW', 'PA', 'PV']
+	[1, 0, 0, 0, 0]
 
+Note that for the fourth line, 1 stands for directed and 0 stands for undirected.
 	
 #### Execute and example
 And we are using python3.<br/> 
