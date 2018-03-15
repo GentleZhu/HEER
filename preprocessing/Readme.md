@@ -78,13 +78,19 @@ Each edge is in the format of:
 	dataset-name.config
 				
 It contains following informaton:
-The first line is a list of node type index pairs, each pair is represented as a list of left node index and right node index, each pair represents an edge; The second line is a list of node indexes starting from 0; The third line is a list of edge types; The fourth line is a list of each edge's directed condition, 1 stands for directed and 0 stands for undirected. Therefore, we might have a sample config file **DBLP.config** as:
+The first line is a list of node type index pairs, each pair is represented as a list of left node index and right node index, each pair represents an edge; The second line is a list of node types; The third line is a list of edge types; The fourth line is a list of each edge's directed condition, 1 stands for directed and 0 stands for undirected. Therefore, we might have a sample config file **DBLP.config** as:
 	
 	[[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]]
 	['P', 'Y', 'W', 'A', 'V']
-	['PP', 'PY', 'PW', 'PA', 'PV']
-	[1, 0, 0, 0, 0]
+	['PP:d', 'PY:u', 'PW:u', 'PA:u', 'PV:u']
+	[1, 0, 0, 0, 0]	
 	
+Note that the elements with the same index in the differet lists from the first line, the third line and the fourth line, these elements present one same edge type.  For example, the second element in these three lists are
+
+	[0, 2], 'PW:u', 0
+	
+It means the edge 'PW:u' is undirected and is formed by one node with index 0 and another node with index 1.
+
 #### Execute and example
 And we are using python3.<br/> 
 
