@@ -10,6 +10,7 @@ from random import random,sample,choice
 import time
 import math
 import argparse
+import os
 
 def ko_edge(tuple_list,ko_rate,edge_dictionary,node_type_dictionary,sample_number,file_hin,buffer_size):
     size=len(tuple_list)
@@ -173,7 +174,20 @@ def build_file(ko_dic,edge_dictionary,node_type_dictionary,sample_number,file_ev
     file.write(content)
     file.close()
     print('finished writing to eval file with not valid count ', not_valid_count)
-        
+def build_config(edge_full_index_list,edge_index_list,node_index_list,edge_direction_list,file_config):
+    assert len(edge_full_index_list) == len(edge_index_list), "Number of edges in edge_full_index_list does not agree with edge_index_list"
+    assert len(edge_index_list) == len(edge_direction_list), "Number of edges in edge_index_list does not agree with edge_direction_list"
+    file =open(file_config,'w+')
+    file.write(str(edge_full_index_list))
+    file.write('\n')
+    file.write(str(node_index_list))
+    file.write('\n')
+    file.write(str(edge_index_list))
+    file.write('\n')
+    file.write(str(edge_direction_list))
+    file.close()
+    print('finished config file.')
+            
     
 if __name__ == '__main__':
     start_time = time.time()
@@ -191,11 +205,25 @@ if __name__ == '__main__':
     edge_dictionary={}
     tuple_list=[]
     node_type_dictionary={}
+    node_index_dictionary={}
+    edge_index_dictionary={}
+    node_index_list=[]
+    edge_index_list=[]
+    edge_full_index_list=[]
+    edge_direction_list=[]
     print("Start reading from hin file ",input_hin_file)
      # holds lines already seen
     with open(input_hin_file,encoding="utf-8") as file:
         count=0
+        node_index_count=0
+        edge_index_count=0
         for line in file:
+            edge_check=False
+            if line not in edge_index_dictionary:
+                edge_index_dictionary[line]=edge_index_count
+                edge_index_list.append(str(edge_index_count))
+                edge_index_count+=1
+                edge_check=True
             line=line.split()
             node_1=line[0]
             node_1=node_1.split(':')
@@ -207,6 +235,23 @@ if __name__ == '__main__':
             node_2_value=node_2[1]
             weight=line[2]
             edge_type=line[3]
+            edge_info=edge_type.split(':')
+            edge_value=edge_info[0]
+            edge_directed=edge_info[1]
+            if node_1_value not in node_index_dictionary:
+                node_index_dictionary[node_1_value]=node_index_count
+                node_index_list.append(str(node_index_count))
+                node_index_count+=1
+            if node_2_value not in node_index_dictionary:
+                node_index_dictionary[node_2_value]=node_index_count
+                node_index_list.append(str(node_index_count))
+                node_index_count+=1
+            if edge_check:
+                edge_full_index_list.append([str(node_index_dictionary[node_1_value]),str(node_index_dictionary[node_2_value])])
+                if edge_directed=='u':
+                    edge_direction_list.append(0)
+                else:
+                    edge_direction_list.append(1)
             #build the edge_dictionary, saving the edges of both nodes into dictionary 
             if node_1_type not in edge_dictionary:
                 edge_dictionary[node_1_type]={}
@@ -240,14 +285,16 @@ if __name__ == '__main__':
     buffer_size=args.buffer_size
     data_set_name=args.data_set_name
     path_out=args.path_output
-    file_hin=path_out+'/'+data_set_name+'_ko_'+str(ko_rate)+'.hin'
-    file_eval=path_out+'/'+data_set_name+'_ko_'+str(ko_rate)+'_eval.txt'
-    #print(edge_dictionary)
-    edge_dictionary,ko_dic,tuple_list=ko_edge(tuple_list,ko_rate,edge_dictionary,node_type_dictionary,sample_number,file_hin,buffer_size)
-    #print(ko_dic)
+    file_config=os.path.join(path_out,data_set_name+'.config') 
     
+    file_hin=os.path.join(path_out,data_set_name+'_ko_'+str(ko_rate)+'.hin')
+    file_eval=os.path.join(path_out,data_set_name+'_ko_'+str(ko_rate)+'_eval.txt')
+    #print(edge_dictionary)
+    build_config(edge_full_index_list,edge_index_list,node_index_list,edge_direction_list,file_config)
+    '''
+    edge_dictionary,ko_dic,tuple_list=ko_edge(tuple_list,ko_rate,edge_dictionary,node_type_dictionary,sample_number,file_hin,buffer_size)
     build_file(ko_dic,edge_dictionary,node_type_dictionary,sample_number,file_eval,buffer_size)
-
+    '''
     elapsed_time = time.time() - start_time
     print(elapsed_time)
             
