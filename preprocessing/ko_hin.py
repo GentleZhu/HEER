@@ -246,7 +246,7 @@ if __name__ == '__main__':
                 node_type_index_count+=1
             if edge_type_check:
                 edge_full_index_list.append([node_type_index_dictionary[node_1_type],node_type_index_dictionary[node_2_type]])
-                edge_type_list.append(str(edge_value))
+                edge_type_list.append(str(edge_type))
                 if edge_directed=='u':
                     edge_direction_list.append(0)
                 else:
