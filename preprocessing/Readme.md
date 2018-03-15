@@ -16,7 +16,9 @@ There are **1** required input file.
 		
 		node_type:node_value
 		
-	For example: P:20883
+	For example: 
+	
+		P:20883
 		
 	And also if edge is directed, edge_type should end with ':d', for example:
 	
