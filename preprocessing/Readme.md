@@ -44,7 +44,7 @@ And another **2** optional input arguments:
 #### Output
 
 There will be 3 files generated. 
-**first file** is named as:
+**The first file** is named as:
 		
 	dataset-name_ko_ko-rate.hin
 
@@ -52,7 +52,7 @@ It contains all the edges from **input-hin-file** without the kicked out edges a
 
 	node_name_1 node_name_2 weight edgetype
 		
-**second file** is named as:
+**The second file** is named as:
 		
 	dataset-name_ko_ko-rate_eval.txt
 
@@ -71,19 +71,17 @@ Each edge is in the format of:
    For one edgetype 'xxx', its reverse type will be marked as 'xxx-1'. For example, one edge type is 'hasChild', 
    then its reverse edge will be 'hasChild-1'.
    
-**third file**	is named as	
+**The third file** is named as	
 	
 	dataset-name.config
 				
 It contains following informaton:
-The first line is a list of edge type, each edge type is represented as a list of left node index and right node index; The second line is a list of node indexes starting from 0. They are in string type; The third line is a list of edge indexes starting from 0. They are in string type; The fourth line is a list of each edge's directed contion. Therefore, we might have this sample config file DBLP.config as:
+The first line is a list of edge type, each edge type is represented as a list of left node index and right node index; The second line is a list of node indexes starting from 0. They are in string type; The third line is a list of edge indexes starting from 0. They are in string type; The fourth line is a list of each edge's directed condition, 1 stands for directed and 0 stands for undirected. Therefore, we might have a sample config file **DBLP.config** as:
 	
 	[[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]]
 	['P', 'Y', 'W', 'A', 'V']
 	['PP', 'PY', 'PW', 'PA', 'PV']
 	[1, 0, 0, 0, 0]
-
-Note that for the fourth line, 1 stands for directed and 0 stands for undirected.
 	
 #### Execute and example
 And we are using python3.<br/> 
