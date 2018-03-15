@@ -18,13 +18,13 @@ There are **1** required input file.
 		
 	For example: P:20883
 		
-	And also if edge is directed, edge_type should be in the format of:
+	And also if edge is directed, edge_type should end with ':d', for example:
 	
-		edge_value:d 
+		<isLocatedin>:d 
 		
-	Otherwise it is in the format of 
+	Otherwise it ends with ':u', for example:
 	
-		edge_value:u
+		<isMarriedto>:u
 			
 With another **3** required input arguments:
 
@@ -76,7 +76,7 @@ Each edge is in the format of:
 	dataset-name.config
 				
 It contains following informaton:
-The first line is a list of edge type, each edge type is represented as a list of left node index and right node index; The second line is a list of node indexes starting from 0. They are in string type; The third line is a list of edge indexes starting from 0. They are in string type; The fourth line is a list of each edge's directed condition, 1 stands for directed and 0 stands for undirected. Therefore, we might have a sample config file **DBLP.config** as:
+The first line is a list of node type index pairs, each pair is represented as a list of left node index and right node index, each pair represents an edge; The second line is a list of node indexes starting from 0; The third line is a list of edge types; The fourth line is a list of each edge's directed condition, 1 stands for directed and 0 stands for undirected. Therefore, we might have a sample config file **DBLP.config** as:
 	
 	[[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]]
 	['P', 'Y', 'W', 'A', 'V']
