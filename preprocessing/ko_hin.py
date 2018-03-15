@@ -291,10 +291,10 @@ if __name__ == '__main__':
     file_eval=os.path.join(path_out,data_set_name+'_ko_'+str(ko_rate)+'_eval.txt')
     #print(edge_dictionary)
     build_config(edge_full_index_list,edge_index_list,node_index_list,edge_direction_list,file_config)
-    '''
+    
     edge_dictionary,ko_dic,tuple_list=ko_edge(tuple_list,ko_rate,edge_dictionary,node_type_dictionary,sample_number,file_hin,buffer_size)
     build_file(ko_dic,edge_dictionary,node_type_dictionary,sample_number,file_eval,buffer_size)
-    '''
+    
     elapsed_time = time.time() - start_time
     print(elapsed_time)
             
