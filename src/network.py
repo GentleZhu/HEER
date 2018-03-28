@@ -35,7 +35,7 @@ class HinLoader(object):
 				node_b_type = self.arg['types'].index(node_b[0])
 				#assert edge_type != 11
 				self.edge_stat[edge_type] += 1
-				assert [node_a_type, node_b_type] == self.arg['edge_types'][edge_type]
+				assert [node_a_type, node_b_type] == self.arg['edge_types'][edge_type][:2]
 				self.input.append([edge_type, self.inNodeMapping(node_a[1], node_a[0])])
 				self.output.append([self.arg['types'].index(node_b[0]), self.inNodeMapping(node_b[1], node_b[0])])
 	
