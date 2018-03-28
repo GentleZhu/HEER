@@ -75,7 +75,7 @@ if __name__ == '__main__':
 	#config['edges'] = [(5, 2), (5, 5), (5, 2), (5, 2), (6, 1), (5, 5), (5, 3), (5, 1), (5, 3), (5, 7), (5, 2), (5, 4), (5, 1), (3, 1), (5, 3), (5, 1), (1, 1), (5, 0), (1, 1), (5, 1), (5, 1), (5, 5), (5, 5), (5, 2), (5, 5)]
 
 	# baseline score
-	if args.map_func == -1:
+	if args.op == -1:
 		_data = utils.load_emb(args.data_dir, args.pre_train_path, args.dimensions, args.graph_name, config['nodes'])
 		args.op = 1
 	#print(_data)
@@ -84,17 +84,17 @@ if __name__ == '__main__':
 
 	type_offset = cPickle.load(open(args.data_dir + args.graph_name + '_offset.p'))
 	model = neg.NEG_loss(type_offset=type_offset, node_types=config['nodes'], edge_types=config['edges'], 
-		embed_size=args.dimensions, pre_train_path=_data, m=args.graph_name, 
+		embed_size=args.dimensions, pre_train_path=_data, graph_name=args.graph_name, 
 		mode=args.op, map_mode=args.map_func)
 	
 
 	
 	#print(model.in_embed.weight.sum())
-	if args.map_func != -1:
+	if args.op != -1:
 		model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
 						'_mode_' + str(args.map_func)+ '.pt'
 		print('model path:',model_path)
-		xxx = t.load(model_path) #, map_location='cpu')
+		xxx = t.load(model_path)
 		#print('after')
 		model.load_state_dict(xxx, False )
 		#print(model.parameters())
@@ -113,8 +113,8 @@ if __name__ == '__main__':
 	for idx, i in enumerate(config['types']):
 		edge_prefix = []
 		edge_prefix += (i, i+'-1')
-		print("Edge Type:", idx)
-		print(edge_prefix)
+		#print("Edge Type:", idx)
+		#print(edge_prefix)
 	
 	#for el in model.edge_mapping:
 	#	print(el, el.weight.data.cpu().numpy().tolist())
@@ -142,7 +142,7 @@ if __name__ == '__main__':
 				print("no this type! in test")
 				continue
 			input_data = tdata.TensorDataset(t.LongTensor(_input), t.LongTensor(_output))
-			print(len(input_data))
+			#print(len(input_data))
 			
 			data_reader = tdata.DataLoader(input_data, args.batch_size, shuffle=False)
 			score = []

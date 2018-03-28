@@ -171,7 +171,7 @@ class NEG_loss(nn.Module):
             #u input_tensor
             #v output_tensor
 
-            if type_u != type_v:
+            if self.edge_types[tp][2] == 0:
             #if True:
                 u_output = self.out_embed(Variable(input_tensor))
                 v_input = self.in_embed(Variable(output_tensor))
@@ -221,7 +221,7 @@ class NEG_loss(nn.Module):
         u_input = self.in_embed(Variable(inputs))
         v_output = self.out_embed(Variable(outputs))
         log_target = 0.0
-        if not directed:
+        if self.edge_types[tp][2] == 0:
             
             u_output = self.out_embed(Variable(inputs))
             v_input = self.in_embed(Variable(outputs))
