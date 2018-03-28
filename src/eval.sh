@@ -2,6 +2,7 @@
 
 #e.g. bash ./src/eval.sh yago_ko_0.4 0 1 -1 yago 7
 
+time_start=$(date +"%Y%m%d_%H%M%S")
 
 green=`tput setaf 2`
 red=`tput setaf 1`
@@ -51,8 +52,14 @@ until [  $timestamp -gt $((epoch - 1)) ]; do
 	--map_func=$map --gpu=$gpu --op=$operator --test-dir="$root_dir"/intermediate_data/ --fast=$fast >> test.log
 
 	python2 ./aux/merge_edges_with_all_types.py --input-ref-file $eval_file --input-score-dir "$root_dir"/intermediate_data/ --input-score-keywords "$network"_pred --output-file "$root_dir"/intermediate_data/heer_"$network"_"$timestamp"_"$operator"_"$map".txt
-	bash ./run/eval_heer.sh $network $timestamp $operator $map
+	bash ./run/eval_heer.sh $network $timestamp $operator $map $time_start  # add $time_start to gen files for plots when running 
 	
 	let timestamp=timestamp+2
 done
+
+## Qi to change
+# 1. specify python2 or python3 in all occurences of python
+# 2. change timestamp to epoch_i
+# 3. change 2 in timestamp=timestamp+2 to an optional argument with 2 being default value; may use something like dump_timer=${7:-2}
+# 4. change all relative paths to begin with "$root_dir"/
 
