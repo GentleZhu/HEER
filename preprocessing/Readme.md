@@ -15,8 +15,18 @@ There are **1** required input file.
 	Note that node_name_1 and node_name_2 are in the format of :
 		
 		node_type:node_value
+		
+	For example: 
 	
-	For example: P:20883
+		P:20883
+		
+	And also if edge is directed, edge_type should end with ':d', for example:
+	
+		<isLocatedin>:d 
+		
+	Otherwise it ends with ':u', for example:
+	
+		<isMarriedto>:u
 			
 With another **3** required input arguments:
 
@@ -35,8 +45,8 @@ And another **2** optional input arguments:
 
 #### Output
 
-There will be 2 files generated. 
-**First file** is named as 
+There will be 3 files generated. 
+**The first file** is named as:
 		
 	dataset-name_ko_ko-rate.hin
 
@@ -44,7 +54,7 @@ It contains all the edges from **input-hin-file** without the kicked out edges a
 
 	node_name_1 node_name_2 weight edgetype
 		
-The **second file** is named as 
+**The second file** is named as:
 		
 	dataset-name_ko_ko-rate_eval.txt
 
@@ -62,8 +72,25 @@ Each edge is in the format of:
 
    For one edgetype 'xxx', its reverse type will be marked as 'xxx-1'. For example, one edge type is 'hasChild', 
    then its reverse edge will be 'hasChild-1'.
-		
-							
+   
+**The third file** is named as	
+	
+	dataset-name.config
+				
+It contains following informaton:
+The first line is a list of node type index pairs, each pair is represented as a list of left node index and right node index, each pair represents an edge; The second line is a list of node types; The third line is a list of edge types; The fourth line is a list of each edge's directed condition, 1 stands for directed and 0 stands for undirected. Therefore, we might have a sample config file **DBLP.config** as:
+	
+	[[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]]
+	['P', 'Y', 'W', 'A', 'V']
+	['PP:d', 'PY:u', 'PW:u', 'PA:u', 'PV:u']
+	[1, 0, 0, 0, 0]	
+	
+Note that the elements with the same index in the differet lists from the first line, the third line and the fourth line, these elements present one same edge type.  For example, the second element in these three lists are
+
+	[0, 2], 'PW:u', 0
+	
+It means the edge 'PW:u' is undirected and is formed by one node with index 0 and another node with index 1.
+
 #### Execute and example
 And we are using python3.<br/> 
 
