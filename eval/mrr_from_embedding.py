@@ -27,14 +27,10 @@ def calculate_rr(batch):
 
 if __name__ == '__main__':
     start_time = time.time()
-    parser = argparse.ArgumentParser(description="Read in input and output filenames.")
-    
+    parser = argparse.ArgumentParser(description="Read in input and output filenames.") 
     parser.add_argument("--input-embedding", nargs="?", help="Input embedding filename.", type=str)
-   
-    parser.add_argument("--input-eval-file", nargs="?", help="Input evaluation file.", type=str)
-    
+    parser.add_argument("--input-eval-file", nargs="?", help="Input evaluation file.", type=str) 
     parser.add_argument("--sample-number", nargs="?", help="Input sample number generated per node", type=int,default=10)
-    
     args = parser.parse_args()
     embedding_dict={}
     input_embedding=args.input_embedding
@@ -53,12 +49,11 @@ if __name__ == '__main__':
         warnings.simplefilter('always', ImportWarning)
         count=0
         total_mrr={}
-        
         exist=False
         rd=0
         sample_number=args.sample_number
-        negative_sample_number,num_positive_edges= map(int, f_in.readline().strip().split())
-        assert negative_sample_number==args.sample_number
+        #negative_sample_number,num_positive_edges= map(int, f_in.readline().strip().split())
+        #assert negative_sample_number==args.sample_number
         for idx, line in enumerate(f_in):
             line_split = line.strip().split()
             key1=line_split[0]
@@ -119,18 +114,22 @@ if __name__ == '__main__':
                 else:
                     count+=1
         idx+=1
-        assert idx/(2*negative_sample_number+1) == num_positive_edges, "Number of positive edges does not agree."
+        #assert idx/(2*negative_sample_number+1) == num_positive_edges, "Number of positive edges does not agree."
         
         total=0
         num_mrr=0
         macro_mrr=0
+        key_list=[]
         for key in total_mrr:
+            key_list.append(key)
+        key_list.sort()
+        for key in key_list:
             s=sum(total_mrr[key])
             l=len(total_mrr[key])
             macro_mrr+=s/l
             total=total+s
             num_mrr=num_mrr+l
-            print ('edge is ',key,'with avg mrr ',s/l)
+            print('edge is '+key+'with avg mrr '+s/l)
         print ('macro avg is', macro_mrr/len(total_mrr))
         print ('micro avg is', total/num_mrr)
             

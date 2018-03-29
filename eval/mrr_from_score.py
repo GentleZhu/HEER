@@ -116,13 +116,17 @@ if __name__ == '__main__':
         total=0
         num_mrr=0
         macro_mrr=0
+        key_list=[]
         for key in total_mrr:
+            key_list.append(key)
+        key_list.sort()
+        for key in key_list:
             s=sum(total_mrr[key])
             l=len(total_mrr[key])
             macro_mrr+=s/l
             total=total+s
             num_mrr=num_mrr+l
-            print ('edge is ',key,'with avg mrr ',s/l)
+            print('edge is '+key+'with avg mrr '+s/l)
         print ('macro avg is', macro_mrr/len(total_mrr))
         print ('micro avg is', total/num_mrr)
         
