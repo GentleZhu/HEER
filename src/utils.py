@@ -12,7 +12,7 @@ def read_config(conf_name):
         config['nodes'] = ast.literal_eval(IN.readline())
         config['types'] = ast.literal_eval(IN.readline())
         for i,x in enumerate(ast.literal_eval(IN.readline())):
-            config['edges'][i].append(x)        
+            config['edges'][i].append(int(x))        
     assert len(config['edges']) == len(config['types'])
     return config
 
