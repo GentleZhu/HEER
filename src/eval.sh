@@ -37,8 +37,6 @@ else
 	eval_file="$root_dir"/input_data/"$network"_eval.txt
 	fast=0
 fi
-eval_file="$root_dir"/input_data/"$network"_eval.txt
-
 
 echo ${yellow}===HEER Testing===${reset}
 python2 ./aux/separate_edges_by_types.py --input-file=$eval_file --output-dir="$root_dir"/intermediate_data/
