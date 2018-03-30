@@ -77,7 +77,7 @@ if __name__ == '__main__':
 	# baseline score
 	if args.op == -1:
 		_data = utils.load_emb(args.data_dir, args.pre_train_path, args.dimensions, args.graph_name, config['nodes'])
-		args.op = 1
+		#args.op = 1
 	#print(_data)
 	t.cuda.set_device(int(args.gpu))
 	
