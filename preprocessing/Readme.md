@@ -7,7 +7,7 @@ This repository provides a reference implementation of edge reconstruction for H
 
 #### Input
 
-There are **1** required input file.
+There is **1** required input file.
 1. **input-hin-file** is the file containing all edges of the input HIN, it should be in the format of :
 					
 		node_name_1 node_name_2 edge_weight edge_type
@@ -28,17 +28,17 @@ There are **1** required input file.
 	
 		<isMarriedto>:u
 			
-With another **3** required input arguments:
+Another **3** required input arguments are:
 
 1. **ko-rate** stands for the knockout rate. It is a float. For example, 0.1 means you will knock out 10% of the original edges.
 
 2. **dataset-name** is the name that the output files will use as prefix. It is a string. For example, if the dataset-name is 'dblp' then the output fils will be named as 'dblp_xxx'. 
 
-3.  **path-output** is the path that the generator will put files to. It is a string. 
+3.  **path-output** is the path where the generator will put files to. It is a string. 
 
-And another **2** optional input arguments:
+And another **2** optional input arguments are:
 
-1. (optional)**sample-number** stands for the number of new edges you want to generate. It is aa integer. For exmaple, with knocked out edge AB, sample number =10 means you will generate 10 new edges with fixed node A and another 10 edges with fixed node B. Thn default sample number =10
+1. (optional)**sample-number** stands for the number of new edges you want to generate. It is an integer. For exmaple, with knocked out edge AB, sample number =10 means you will generate 10 new edges with fixed node A and another 10 edges with fixed node B. Then default sample number =10
 
 2. (optional)**buffer-size** is the size of temporary trunk for output saving. It is an integer. The default buffer-size = 500000.
 
@@ -63,7 +63,7 @@ The first line of **second file** contains the basic information as :
 	#_of_negative_example_per_direction_in_one_batch #_of_total_batches.
 
 Note that one Batch has (1+**sample-number***2) edges, the fisrt edge in the batch is the edge that has been knocked out from 
-**input-hin-file**, then the following **sample-number***2 node pairs that are not associated by edges with respect to this  knocked out edge. 
+**input-hin-file**, then the following **sample-number***2 node pairs that are not associated by edges with respect to this knocked out edge. 
 The detailed generating rule is explaned in our paper.
 
 Each edge is in the format of:
