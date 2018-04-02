@@ -14,8 +14,8 @@ def parse_args():
 	'''
 	parser = argparse.ArgumentParser(description="Run heer.")
 
-	parser.add_argument('--config', nargs='?', 
-	                    help='Configuration file of input network')
+	parser.add_argument('--more-param', nargs='?', default='None' 
+	                    help='customized parameter setting')
 
 	parser.add_argument('--input', nargs='?', default='graph/karate.edgelist',
 	                    help='Input graph path')
@@ -70,7 +70,8 @@ if __name__ == '__main__':
 	args = parse_args()
 	arg = {}
 	_data = ''
-	config = utils.read_config(args.config)
+	config_name = os.path.join(os.path.dirname(args.graph_name), args.graph_name.split('_ko_')[0] + '.config')
+	config = utils.read_config(config_name)
 	#config['nodes'] = ['PR', 'AD', 'WO', 'AS', 'GE', 'PE', 'EV', 'PO']
 	#config['edges'] = [(5, 2), (5, 5), (5, 2), (5, 2), (6, 1), (5, 5), (5, 3), (5, 1), (5, 3), (5, 7), (5, 2), (5, 4), (5, 1), (3, 1), (5, 3), (5, 1), (1, 1), (5, 0), (1, 1), (5, 1), (5, 1), (5, 5), (5, 5), (5, 2), (5, 5)]
 
@@ -91,8 +92,12 @@ if __name__ == '__main__':
 	
 	#print(model.in_embed.weight.sum())
 	if args.op != -1:
-		model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
-						'_mode_' + str(args.map_func)+ '.pt'
+		if args.more_param != 'None':
+			model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + 
+				'_mode_' + str(args.map_func)+ '_' + args.more_param + '.pt'
+		else:
+			model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + 
+				'_mode_' + str(args.map_func)+ '.pt'
 		print('model path:',model_path)
 		xxx = t.load(model_path)
 		#print('after')

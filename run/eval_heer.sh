@@ -19,13 +19,14 @@ network=$1  # a.k.a. graph_name; e.g., yago_ko_0.2
 epoch=$2  # number of epochs
 operator=$3  # operator used to compose edge embedding from node embeddings
 map=$4  # mapping on top of edge embedding
+more_param=$5  # more customized parameters 
 
 # optional argument specifying model evaluation start time when evaluating multiple epochs from the same model
 # null if evaluating a single file
-per_epoch_eval_time_start=${5:-null}
+per_epoch_eval_time_start=${6:-null}
 
 # files
-score_file="$root_dir"/intermediate_data/heer_"$network"_"$epoch"_"$operator"_"$map".txt
+score_file="$root_dir"/intermediate_data/heer_"$network"_"$epoch"_"$operator"_"$map"_"$more_param".txt
 fast_eval_file="$root_dir"/input_data/"$network"_eval_fast.txt
 if [ -f "$fast_eval_file" ]; then
 	eval_file="$fast_eval_file"
@@ -33,12 +34,12 @@ else
 	echo "File $fast_eval_file does not exist. Using non-fast version for evaluation."
 	eval_file="$root_dir"/input_data/"$network"_eval.txt
 fi
-output_file="$root_dir"/output/out_heer_"$network"_"$epoch"_"$operator"_"$map"_"$time_start".txt
+output_file="$root_dir"/output/out_heer_"$network"_"$epoch"_"$operator"_"$map"_"$more_param"_"$time_start".txt
 
 python3 "$root_dir"/eval/mrr_from_score.py --input-score-file $score_file --input-eval-file $eval_file > "$output_file"
 
 # when the 5th arg, per_epoch_eval_time_start, is specified, multi-epoch is called by "$root_dir"/src/eval.sh; two more files should be generated
 if [ "$per_epoch_eval_time_start" != "null" ]; then
-  tail -n 1 "$output_file" | awk '{print $NF}' >> "$root_dir"/output/mrr_micro_heer_"$network"_"$operator"_"$map"_"$per_epoch_eval_time_start".txt
-  tail -n 2 "$output_file" | head -n 1 | awk '{print $NF}' >> "$root_dir"/output/mrr_macro_heer_"$network"_"$operator"_"$map"_"$per_epoch_eval_time_start".txt
+  tail -n 1 "$output_file" | awk '{print $NF}' >> "$root_dir"/output/mrr_micro_heer_"$network"_"$epoch"_"$operator"_"$map"_"$more_param"_"$per_epoch_eval_time_start".txt
+  tail -n 2 "$output_file" | head -n 1 | awk '{print $NF}' >> "$root_dir"/output/mrr_macro_heer_"$network"_"$epoch"_"$operator"_"$map"_"$more_param"_"$per_epoch_eval_time_start".txt
 fi
