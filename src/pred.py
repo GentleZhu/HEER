@@ -1,7 +1,7 @@
 import torch as t
 import numpy as np
 import cPickle
-import sys
+import sys,os
 import neg
 import argparse
 import torch.utils.data as tdata
@@ -14,7 +14,7 @@ def parse_args():
 	'''
 	parser = argparse.ArgumentParser(description="Run heer.")
 
-	parser.add_argument('--more-param', nargs='?', default='None' 
+	parser.add_argument('--more-param', nargs='?', default='None',
 	                    help='customized parameter setting')
 
 	parser.add_argument('--input', nargs='?', default='graph/karate.edgelist',
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	args = parse_args()
 	arg = {}
 	_data = ''
-	config_name = os.path.join(os.path.dirname(args.graph_name), args.graph_name.split('_ko_')[0] + '.config')
+	config_name = os.path.join(os.path.dirname(args.data_dir).replace('intermediate', 'input'), args.graph_name.split('_ko_')[0] + '.config')
 	config = utils.read_config(config_name)
 	#config['nodes'] = ['PR', 'AD', 'WO', 'AS', 'GE', 'PE', 'EV', 'PO']
 	#config['edges'] = [(5, 2), (5, 5), (5, 2), (5, 2), (6, 1), (5, 5), (5, 3), (5, 1), (5, 3), (5, 7), (5, 2), (5, 4), (5, 1), (3, 1), (5, 3), (5, 1), (1, 1), (5, 0), (1, 1), (5, 1), (5, 1), (5, 5), (5, 5), (5, 2), (5, 5)]
@@ -93,10 +93,10 @@ if __name__ == '__main__':
 	#print(model.in_embed.weight.sum())
 	if args.op != -1:
 		if args.more_param != 'None':
-			model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + 
+			model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
 				'_mode_' + str(args.map_func)+ '_' + args.more_param + '.pt'
 		else:
-			model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + 
+			model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
 				'_mode_' + str(args.map_func)+ '.pt'
 		print('model path:',model_path)
 		xxx = t.load(model_path)

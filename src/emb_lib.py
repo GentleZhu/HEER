@@ -83,10 +83,10 @@ class SkipGram(object):
 
 				if epoch % self.dump_timer == 0:
 					if self.more_param != 'None':
-						model_path = self.model_dir + 'heer_' + self.graph_name + '_' + str(epoch) + '_op_' + str(self.mode) + 
+						model_path = self.model_dir + 'heer_' + self.graph_name + '_' + str(epoch) + '_op_' + str(self.mode) + \
 							'_mode_' + str(self.map_mode)+ '_' + self.more_param + '.pt'
 					else:
-						model_path = self.model_dir + 'heer_' + self.graph_name + '_' + str(epoch) + '_op_' + str(self.mode) + 
+						model_path = self.model_dir + 'heer_' + self.graph_name + '_' + str(epoch) + '_op_' + str(self.mode) + \
 							'_mode_' + str(self.map_mode)+ '.pt'
 					t.save(self.neg_loss.state_dict(), model_path)
 

@@ -18,7 +18,7 @@ def parse_args():
 	'''
 	parser = argparse.ArgumentParser(description="Run heer.")
 
-	parser.add_argument('--more-param', nargs='?', default='None' 
+	parser.add_argument('--more-param', nargs='?', default='None', 
 	                    help='customized parameter setting')
 
 	parser.add_argument('--input', nargs='?',
