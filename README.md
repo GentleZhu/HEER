@@ -22,7 +22,7 @@ operator:
 mapping function:
 
 	-1. unimetric
-	0. linear mappng with batch norm
+	0. linear mappng
 	1. linear mappng with batch norm
 	2. linear mappng with batch norm + ReLU
-	3. fully connected mappng with batch norm
+	3. deeper metric module
