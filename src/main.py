@@ -100,7 +100,7 @@ def main(args):
 	Pipeline for representational learning for all nodes in a graph.
 	'''
 	global config
-	config_name = os.path.join(os.path.dirname(args.graph_name), args.graph_name.split('_ko_')[0] + '.config')
+	config_name = os.path.join(args.data_dir.replace('intermediate', 'input'), args.graph_name.split('_ko_')[0] + '.config')
 	config = utils.read_config(config_name)
 	if args.build_graph:
 		#print(args.node_types)
