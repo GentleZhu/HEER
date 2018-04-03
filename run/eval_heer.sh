@@ -40,6 +40,6 @@ python3 "$root_dir"/eval/mrr_from_score.py --input-score-file $score_file --inpu
 
 # when the 5th arg, per_epoch_eval_time_start, is specified, multi-epoch is called by "$root_dir"/src/eval.sh; two more files should be generated
 if [ "$per_epoch_eval_time_start" != "null" ]; then
-  tail -n 1 "$output_file" | awk '{print $NF}' >> "$root_dir"/output/mrr_micro_heer_"$network"_"$epoch"_"$operator"_"$map"_"$more_param"_"$per_epoch_eval_time_start".txt
-  tail -n 2 "$output_file" | head -n 1 | awk '{print $NF}' >> "$root_dir"/output/mrr_macro_heer_"$network"_"$epoch"_"$operator"_"$map"_"$more_param"_"$per_epoch_eval_time_start".txt
+  tail -n 1 "$output_file" | awk '{print $NF}' >> "$root_dir"/output/mrr_micro_heer_"$network"_"$operator"_"$map"_"$more_param"_"$per_epoch_eval_time_start".txt
+  tail -n 2 "$output_file" | head -n 1 | awk '{print $NF}' >> "$root_dir"/output/mrr_macro_heer_"$network"_"$operator"_"$map"_"$more_param"_"$per_epoch_eval_time_start".txt
 fi
