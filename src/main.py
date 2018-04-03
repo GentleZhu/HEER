@@ -78,9 +78,20 @@ def learn_embeddings():
 	Learn embeddings by optimizing the Skipgram objective using SGD.
 	'''
 	print(config)
+
+	# flexible param interface for tuning
+	more_param = args.more_param  # everything separated by underscore, e.g., rescale_0.1_lr_0.02
+	more_param_dict = {}  # {param_key: param_value_str}
+	if more_param != 'None':
+		more_param_list = more_param.split("_")
+		assert len(more_param_list) % 2 == 0
+		for i in xrange(0, len(more_param_list), 2):
+			more_param_dict[more_param_list[i]] = more_param_list[i+1]
+	rescale_factor = 1. if 'rescale' not in more_param_dict else float(more_param_dict['rescale'])
+
 	_data = ''
 	if len(args.pre_train_path) > 0:
-		_data = utils.load_emb(args.data_dir, args.pre_train_path, args.dimensions, args.graph_name, config['nodes'])
+		_data = rescale_factor * utils.load_emb(args.data_dir, args.pre_train_path, args.dimensions, args.graph_name, config['nodes'])
 	_network = tdata.TensorDataset(t.LongTensor(cPickle.load(open(args.data_dir + args.graph_name + '_input.p'))), 
                                t.LongTensor(cPickle.load(open(args.data_dir + args.graph_name + '_output.p'))))
 	model = SkipGram({'emb_size':args.dimensions,
