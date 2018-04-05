@@ -56,6 +56,7 @@ class SkipGram(object):
 			yield param
 
 	def train(self):
+		self.neg_loss.train()
 		with open(self.model_dir + 'heer_' + self.graph_name + '_op_' + str(self.mode) + 
 						'_mode_' + str(self.map_mode)+ '.log', 'w') as LOG:
 			for epoch in xrange(self.iter):
