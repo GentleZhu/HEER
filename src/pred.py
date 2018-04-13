@@ -102,6 +102,9 @@ if __name__ == '__main__':
 		xxx = t.load(model_path)
 		#print('after')
 		model.load_state_dict(xxx, False )
+	model.eval()
+	#if args.map_func == 1:
+	#	model.map_mode = 0
 		#print(model.parameters())
 
 	#model.load_state_dict(t.load('/shared/data/qiz3/data/model/' +  args.model_name +'.pt'))
