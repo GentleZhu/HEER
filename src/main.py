@@ -88,6 +88,8 @@ def learn_embeddings():
 		for i in xrange(0, len(more_param_list), 2):
 			more_param_dict[more_param_list[i]] = more_param_list[i+1]
 	rescale_factor = 1. if 'rescale' not in more_param_dict else float(more_param_dict['rescale'])
+	learning_rate = 1. if 'lr' not in more_param_dict else float(more_param_dict['lr'])
+	learning_rate_ratio = 16. if 'lrr' not in more_param_dict else float(more_param_dict['lrr'])
 
 	_data = ''
 	if len(args.pre_train_path) > 0:
@@ -98,7 +100,7 @@ def learn_embeddings():
 		'window_size':1, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':5,
 		'graph_name':args.graph_name, 'dump_timer':args.dump_timer, 'model_dir':args.model_dir,
 		'data_dir':args.data_dir, 'mode':args.op, 'map_mode':args.map_func,
-		'lr_ratio':16, 'lr': 1.0, 'network':_network, 'more_param': args.more_param,
+		'lr_ratio':learning_rate_ratio, 'lr': learning_rate, 'network':_network, 'more_param': args.more_param,
 		'pre_train':_data, 'node_types':config['nodes'], 'edge_types':config['edges']})
 	
 
