@@ -9,8 +9,6 @@ import numpy as np
 import sys
 import time
 import argparse
-import warnings
-
 
 def calculate_rr(batch):
     target=batch[0]
@@ -50,7 +48,6 @@ if __name__ == '__main__':
     input_eval_file=args.input_eval_file
     
     with open(input_eval_file, "r") as f_in:
-        warnings.simplefilter('always', ImportWarning)
         count=0
         total_mrr={}
         exist=False
@@ -66,28 +63,22 @@ if __name__ == '__main__':
             key=key1+' '+key2
             if count==0: 
                 current=[]
-                if key in score_dict:
-                    edge_type=line_split[-1]
-                    edge_type_reverse=edge_type+'-1'
-                    if edge_type not in total_mrr:
-                        total_mrr[edge_type]=[]
-                    if edge_type_reverse not in total_mrr:
-                        total_mrr[edge_type_reverse ]=[]
-                    exist=True
-                    target=score_dict[key]
-                    current.append(float(target) )
+                assert key in score_dict,key+" does not exist."
+                edge_type=line_split[-1]
+                edge_type_reverse=edge_type+'-1'
+                if edge_type not in total_mrr:
+                    total_mrr[edge_type]=[]
+                if edge_type_reverse not in total_mrr:
+                    total_mrr[edge_type_reverse ]=[]
+                exist=True
+                target=score_dict[key]
+                current.append(float(target) )
                     #print(target)
-                else:
-                    warning_word=key+" does not exist."
-                    warnings.warn(warning_word)
                 count+=1
             else:
                 if exist:
-                    if key in score_dict:
-                        current.append(float(score_dict[key]) )
-                    else:
-                        warning_word=key+" does not exist."
-                        warnings.warn(warning_word)
+                    assert key in score_dict, key+" does not exist."
+                    current.append(float(score_dict[key]) )
                 if count==sample_number:
                     if exist:
                         edge_type=line_split[-1]
@@ -126,7 +117,7 @@ if __name__ == '__main__':
             macro_mrr+=s/l
             total=total+s
             num_mrr=num_mrr+l
-            print('edge is '+key+'with avg mrr '+s/l)
+            print('edge is '+key+'with avg mrr '+str(s/l))
         print ('macro avg is', macro_mrr/len(total_mrr))
         print ('micro avg is', total/num_mrr)
         

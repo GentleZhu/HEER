@@ -129,7 +129,7 @@ if __name__ == '__main__':
             macro_mrr+=s/l
             total=total+s
             num_mrr=num_mrr+l
-            print('edge is '+key+'with avg mrr '+s/l)
+            print('edge is '+key+'with avg mrr '+str(s/l))
         print ('macro avg is', macro_mrr/len(total_mrr))
         print ('micro avg is', total/num_mrr)
             
