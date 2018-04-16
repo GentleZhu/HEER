@@ -14,8 +14,10 @@ network=$1  # a.k.a. graph_name; e.g., yago_ko_0.2
 epoch=$2  # number of epochs
 operator=$3  # operator used to compose edge embedding from node embeddings
 map=$4  # mapping on top of edge embedding
-config=$5  # network configuration
+more_param=$5  # more customized parameters
 gpu=$6 # working gpu for prediction
+dump_timer=${7:-2} # default dump timer
+
 
 # find relative root directory
 SOURCE="${BASH_SOURCE[0]}"
@@ -39,25 +41,19 @@ else
 fi
 
 echo ${yellow}===HEER Testing===${reset}
-python2 ./aux/separate_edges_by_types.py --input-file=$eval_file --output-dir="$root_dir"/intermediate_data/
+python2 "$root_dir"/aux/separate_edges_by_types.py --input-file=$eval_file --output-dir="$root_dir"/intermediate_data/
 
-
-timestamp=0
-until [  $timestamp -gt $((epoch - 1)) ]; do
-	echo $timestamp
-	python ./src/pred.py --iter=$timestamp --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/model/ \
-	--pre-train-path="$root_dir"/intermediate_data/pretrained_"$network".emb --config="$root_dir"/input_data/"$config".config \
+curr_step=0
+until [  $curr_step -gt $((epoch - 1)) ]; do
+	echo $curr_step
+	python2 "$root_dir"/src/pred.py --iter=$curr_step --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/model/ \
+	--pre-train-path="$root_dir"/intermediate_data/pretrained_"$network".emb --more-param="$more_param" \
 	--map_func=$map --gpu=$gpu --op=$operator --test-dir="$root_dir"/intermediate_data/ --fast=$fast >> test.log
 
-	python2 ./aux/merge_edges_with_all_types.py --input-ref-file $eval_file --input-score-dir "$root_dir"/intermediate_data/ --input-score-keywords "$network"_pred --output-file "$root_dir"/intermediate_data/heer_"$network"_"$timestamp"_"$operator"_"$map".txt
-	bash ./run/eval_heer.sh $network $timestamp $operator $map $time_start  # add $time_start to gen files for plots when running 
+	python2 "$root_dir"/aux/merge_edges_with_all_types.py --input-ref-file $eval_file --input-score-dir "$root_dir"/intermediate_data/ --input-score-keywords "$network"_pred --output-file "$root_dir"/intermediate_data/heer_"$network"_"$curr_step"_"$operator"_"$map"_"$more_param".txt
+	bash "$root_dir"/run/eval_heer.sh $network $curr_step $operator $map $more_param $time_start  # add $time_start to gen files for plots when running 
 	
-	let timestamp=timestamp+2
+	let " curr_step += dump_timer "
 done
 
-## Qi to change
-# 1. specify python2 or python3 in all occurences of python
-# 2. change timestamp to epoch_i
-# 3. change 2 in timestamp=timestamp+2 to an optional argument with 2 being default value; may use something like dump_timer=${7:-2}
-# 4. change all relative paths to begin with "$root_dir"/
 

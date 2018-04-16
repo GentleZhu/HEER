@@ -12,8 +12,9 @@ network=$1  # a.k.a. graph_name; e.g., yago_ko_0.2
 epoch=$2  # number of epochs
 operator=$3  # operator used to compose edge embedding from node embeddings
 map=$4  # mapping on top of edge embedding
-config=$5  # network configuration
+more_param=$5  # more customized parameters
 gpu=$6 # working gpu for prediction
+dump_timer=${7:-2} # default dump timer
 
 # find relative root directory
 SOURCE="${BASH_SOURCE[0]}"
@@ -24,16 +25,17 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 script_dir="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 root_dir="$( dirname $script_dir )"
+SUFFIX=_input.p
 
 
 echo ${green}===Constructing Training Net===${reset}
 if [ ! -e  "$root_dir"/intermediate_data/"$network$SUFFIX" ]; then
 	#python main.py --input=/shared/data/yushi2/edge_rep_codes/input_data/yago_no_gender_0.4_out.net --build-graph=True --graph-name=$GRAPH_NAME --data-dir=$DATA_DIR
 	python ./src/main.py --input="$root_dir"/input_data/"$network".hin --build-graph=True \
-		--graph-name=$network --data-dir="$root_dir"/intermediate_data/ --config="$root_dir"/input_data/"$config".config
+		--graph-name=$network --data-dir="$root_dir"/intermediate_data/
 fi
 echo ${red}===HEER Training===${reset}
 python ./src/main.py --iter=$2 --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/model/ \
 --pre-train-path="$root_dir"/intermediate_data/pretrained_"$network".emb \
---dump-timer=2 --map_func=$map --op=$operator --gpu=$gpu --config="$root_dir"/input_data/"$config".config
+--dump-timer=$dump_timer --map_func=$map --op=$operator --gpu=$gpu --more-param="$more_param"
 

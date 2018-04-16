@@ -1,7 +1,7 @@
 import torch as t
 import numpy as np
 import cPickle
-import sys
+import sys,os
 import neg
 import argparse
 import torch.utils.data as tdata
@@ -14,8 +14,8 @@ def parse_args():
 	'''
 	parser = argparse.ArgumentParser(description="Run heer.")
 
-	parser.add_argument('--config', nargs='?', 
-	                    help='Configuration file of input network')
+	parser.add_argument('--more-param', nargs='?', default='None',
+	                    help='customized parameter setting')
 
 	parser.add_argument('--input', nargs='?', default='graph/karate.edgelist',
 	                    help='Input graph path')
@@ -70,14 +70,15 @@ if __name__ == '__main__':
 	args = parse_args()
 	arg = {}
 	_data = ''
-	config = utils.read_config(args.config)
+	config_name = os.path.join(os.path.dirname(args.data_dir).replace('intermediate', 'input'), args.graph_name.split('_ko_')[0] + '.config')
+	config = utils.read_config(config_name)
 	#config['nodes'] = ['PR', 'AD', 'WO', 'AS', 'GE', 'PE', 'EV', 'PO']
 	#config['edges'] = [(5, 2), (5, 5), (5, 2), (5, 2), (6, 1), (5, 5), (5, 3), (5, 1), (5, 3), (5, 7), (5, 2), (5, 4), (5, 1), (3, 1), (5, 3), (5, 1), (1, 1), (5, 0), (1, 1), (5, 1), (5, 1), (5, 5), (5, 5), (5, 2), (5, 5)]
 
 	# baseline score
 	if args.op == -1:
 		_data = utils.load_emb(args.data_dir, args.pre_train_path, args.dimensions, args.graph_name, config['nodes'])
-		args.op = 1
+		#args.op = 1
 	#print(_data)
 	t.cuda.set_device(int(args.gpu))
 	
@@ -91,18 +92,30 @@ if __name__ == '__main__':
 	
 	#print(model.in_embed.weight.sum())
 	if args.op != -1:
-		model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
-						'_mode_' + str(args.map_func)+ '.pt'
+		if args.more_param != 'None':
+			model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
+				'_mode_' + str(args.map_func)+ '_' + args.more_param + '.pt'
+		else:
+			model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
+				'_mode_' + str(args.map_func)+ '.pt'
 		print('model path:',model_path)
-		xxx = t.load(model_path)
-		#print('after')
+		xxx = t.load(model_path, map_location=lambda storage, loc: storage)
 		model.load_state_dict(xxx, False )
+		model.cuda()
+	model.eval()
+	#if args.map_func == 1:
+	#	model.map_mode = 0
 		#print(model.parameters())
 
 	#model.load_state_dict(t.load('/shared/data/qiz3/data/model/' +  args.model_name +'.pt'))
 	#print(model.in_embed.weight.sum())
+	#print(model.in_embed.weight[1000].data.cpu().numpy().tolist())
 	#for el in model.edge_mapping:
 	#	print(el, el.weight.data.cpu().numpy().tolist())
+	#print(model.)
+	for el in model.edge_mapping_bn:
+		print(el, el.weight.data.cpu().numpy().tolist())
+	
 	#sys.exit(-1)
 	
 	print("Model Mode:", args.op)

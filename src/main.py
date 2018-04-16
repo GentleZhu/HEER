@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import os
 from emb_lib import SkipGram
 import network as nx
 import torch as t
@@ -17,8 +18,8 @@ def parse_args():
 	'''
 	parser = argparse.ArgumentParser(description="Run heer.")
 
-	parser.add_argument('--config', nargs='?', 
-	                    help='Configuration file of input network')
+	parser.add_argument('--more-param', nargs='?', default='None', 
+	                    help='customized parameter setting')
 
 	parser.add_argument('--input', nargs='?',
 	                    help='Input graph path')
@@ -77,14 +78,16 @@ def learn_embeddings():
 	Learn embeddings by optimizing the Skipgram objective using SGD.
 	'''
 	print(config)
-	_data = utils.load_emb(args.data_dir, args.pre_train_path, args.dimensions, args.graph_name, config['nodes'])
+	_data = ''
+	if len(args.pre_train_path) > 0:
+		_data = utils.load_emb(args.data_dir, args.pre_train_path, args.dimensions, args.graph_name, config['nodes'])
 	_network = tdata.TensorDataset(t.LongTensor(cPickle.load(open(args.data_dir + args.graph_name + '_input.p'))), 
                                t.LongTensor(cPickle.load(open(args.data_dir + args.graph_name + '_output.p'))))
 	model = SkipGram({'emb_size':args.dimensions,
 		'window_size':1, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':5,
 		'graph_name':args.graph_name, 'dump_timer':args.dump_timer, 'model_dir':args.model_dir,
 		'data_dir':args.data_dir, 'mode':args.op, 'map_mode':args.map_func,
-		'lr_ratio':16, 'lr': 1.0, 'network':_network,
+		'lr_ratio':16, 'lr': 1.0, 'network':_network, 'more_param': args.more_param,
 		'pre_train':_data, 'node_types':config['nodes'], 'edge_types':config['edges']})
 	
 
@@ -97,7 +100,8 @@ def main(args):
 	Pipeline for representational learning for all nodes in a graph.
 	'''
 	global config
-	config = utils.read_config(args.config)
+	config_name = os.path.join(args.data_dir.replace('intermediate', 'input'), args.graph_name.split('_ko_')[0] + '.config')
+	config = utils.read_config(config_name)
 	if args.build_graph:
 		#print(args.node_types)
 		tmp = nx.HinLoader({'graph': args.input, 'types':config['nodes'], 'edge_types':config['edges']})

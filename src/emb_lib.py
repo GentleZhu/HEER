@@ -28,6 +28,7 @@ class SkipGram(object):
 		self.map_mode = arg['map_mode']
 		self.dump_timer = arg['dump_timer']
 		self.model_dir = arg['model_dir']
+		self.more_param = arg['more_param']
 		#enable batch normalization
 		if self.map_mode != -1:
 			_params = [{'params': self.neg_loss.in_embed.parameters()}, 
@@ -55,6 +56,7 @@ class SkipGram(object):
 			yield param
 
 	def train(self):
+		self.neg_loss.train()
 		with open(self.model_dir + 'heer_' + self.graph_name + '_op_' + str(self.mode) + 
 						'_mode_' + str(self.map_mode)+ '.log', 'w') as LOG:
 			for epoch in xrange(self.iter):
@@ -81,8 +83,13 @@ class SkipGram(object):
 					
 
 				if epoch % self.dump_timer == 0:
-					t.save(self.neg_loss.state_dict(), self.model_dir + 'heer_' + self.graph_name + '_' + str(epoch) + '_op_' + str(self.mode) + 
-						'_mode_' + str(self.map_mode)+ '.pt')
+					if self.more_param != 'None':
+						model_path = self.model_dir + 'heer_' + self.graph_name + '_' + str(epoch) + '_op_' + str(self.mode) + \
+							'_mode_' + str(self.map_mode)+ '_' + self.more_param + '.pt'
+					else:
+						model_path = self.model_dir + 'heer_' + self.graph_name + '_' + str(epoch) + '_op_' + str(self.mode) + \
+							'_mode_' + str(self.map_mode)+ '.pt'
+					t.save(self.neg_loss.state_dict(), model_path)
 
 				LOG.write(str(epoch) + '\t' + str(np.asscalar(loss_sum.data.cpu().numpy())) + '\n')
 				LOG.flush()

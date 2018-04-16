@@ -44,9 +44,9 @@ class NEG_loss(nn.Module):
         self.in_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
 
         if len(pre_train_path) > 0:
-
             self.in_embed.weight.data.copy_(t.from_numpy(pre_train_path))
             self.out_embed.weight.data.copy_(t.from_numpy(pre_train_path))
+            print('pre-train embedding loaded!')
 
         
         if self.map_mode > -1: 

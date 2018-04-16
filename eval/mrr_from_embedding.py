@@ -8,8 +8,6 @@ Created on Fri Jan 19 12:39:34 2018
 import numpy as np
 import argparse
 import time
-import warnings
-
 
 def calculate_rr(batch):
     target=batch[0]
@@ -46,7 +44,6 @@ if __name__ == '__main__':
     input_eval_file=args.input_eval_file
     
     with open(input_eval_file, "r") as f_in:
-        warnings.simplefilter('always', ImportWarning)
         count=0
         total_mrr={}
         exist=False
@@ -72,12 +69,8 @@ if __name__ == '__main__':
                     target=embedding_dict[key1].dot(embedding_dict[key2])
                     current.append(target) 
                 else:
-                    if key1 not in embedding_dict:
-                        warning_word=key1+' does not exist.'
-                        warnings.warn(warning_word)
-                    if key2 not in embedding_dict:
-                        warning_word=key2+' does not exist.'
-                        warnings.warn(warning_word)
+                    assert key1 in embedding_dict, key1+' does not exist.'
+                    assert key2 in embedding_dict, key2+' does not exist.'
                     #print(target)
                 count+=1
             else:
@@ -85,12 +78,8 @@ if __name__ == '__main__':
                     if key1 in embedding_dict and key2 in embedding_dict:
                         current.append(embedding_dict[key1].dot(embedding_dict[key2])) 
                     else:
-                        if key1 not in embedding_dict:
-                            warning_word=key1+' does not exist.'
-                            warnings.warn(warning_word)
-                        if key2 not in embedding_dict:
-                            warning_word=key2+' does not exist.'
-                            warnings.warn(warning_word)
+                        assert key1 in embedding_dict, key1+' does not exist.'
+                        assert key2 in embedding_dict, key2+' does not exist.'
                 if count==sample_number:
                     if exist:
                         edge_type=line_split[-1]
