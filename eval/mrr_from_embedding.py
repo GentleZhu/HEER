@@ -68,18 +68,11 @@ if __name__ == '__main__':
                     exist =True
                     target=embedding_dict[key1].dot(embedding_dict[key2])
                     current.append(target) 
-                else:
-                    assert key1 in embedding_dict, key1+' does not exist.'
-                    assert key2 in embedding_dict, key2+' does not exist.'
-                    #print(target)
                 count+=1
             else:
                 if exist:
                     if key1 in embedding_dict and key2 in embedding_dict:
                         current.append(embedding_dict[key1].dot(embedding_dict[key2])) 
-                    else:
-                        assert key1 in embedding_dict, key1+' does not exist.'
-                        assert key2 in embedding_dict, key2+' does not exist.'
                 if count==sample_number:
                     if exist:
                         edge_type=line_split[-1]
