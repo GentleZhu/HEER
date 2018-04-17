@@ -99,9 +99,9 @@ if __name__ == '__main__':
 			model_path = args.model_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
 				'_mode_' + str(args.map_func)+ '.pt'
 		print('model path:',model_path)
-		xxx = t.load(model_path)
-		#print('after')
+		xxx = t.load(model_path, map_location=lambda storage, loc: storage)
 		model.load_state_dict(xxx, False )
+		model.cuda()
 	model.eval()
 	#if args.map_func == 1:
 	#	model.map_mode = 0
@@ -109,8 +109,13 @@ if __name__ == '__main__':
 
 	#model.load_state_dict(t.load('/shared/data/qiz3/data/model/' +  args.model_name +'.pt'))
 	#print(model.in_embed.weight.sum())
+	#print(model.in_embed.weight[1000].data.cpu().numpy().tolist())
 	#for el in model.edge_mapping:
 	#	print(el, el.weight.data.cpu().numpy().tolist())
+	#print(model.)
+	for el in model.edge_mapping_bn:
+		print(el, el.weight.data.cpu().numpy().tolist())
+	
 	#sys.exit(-1)
 	
 	print("Model Mode:", args.op)
