@@ -63,7 +63,7 @@ if __name__ == '__main__':
             key=key1+' '+key2
             if count==0: 
                 current=[]
-                #assert key in score_dict,key+" does not exist."
+                assert key in score_dict,key+" does not exist."
                 edge_type=line_split[-1]
                 edge_type_reverse=edge_type+'-1'
                 if edge_type not in total_mrr:
@@ -77,7 +77,7 @@ if __name__ == '__main__':
                 count+=1
             else:
                 if exist:
-                    #assert key in score_dict, key+" does not exist."
+                    assert key in score_dict, key+" does not exist."
                     current.append(float(score_dict[key]) )
                 if count==sample_number:
                     if exist:
