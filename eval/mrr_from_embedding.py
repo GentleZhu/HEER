@@ -58,28 +58,24 @@ if __name__ == '__main__':
             #print(key1[0],key2[0])
             if count==0: 
                 current=[]
-                if key1 in embedding_dict and key2 in embedding_dict:
-                    edge_type=line_split[-1]
-                    edge_type_reverse=edge_type+'-1'
-                    if edge_type not in total_mrr:
-                        total_mrr[edge_type]=[]
-                    if edge_type_reverse not in total_mrr:
-                        total_mrr[edge_type_reverse]=[]
-                    exist =True
-                    target=embedding_dict[key1].dot(embedding_dict[key2])
-                    current.append(target) 
-                else:
-                    assert key1 in embedding_dict, key1+' does not exist.'
-                    assert key2 in embedding_dict, key2+' does not exist.'
-                    #print(target)
+                assert key1 in embedding_dict, key1+' does not exist.'
+                assert key2 in embedding_dict, key2+' does not exist.'
+                
+                edge_type=line_split[-1]
+                edge_type_reverse=edge_type+'-1'
+                if edge_type not in total_mrr:
+                    total_mrr[edge_type]=[]
+                if edge_type_reverse not in total_mrr:
+                    total_mrr[edge_type_reverse]=[]
+                exist =True
+                target=embedding_dict[key1].dot(embedding_dict[key2])
+                current.append(target) 
                 count+=1
             else:
                 if exist:
-                    if key1 in embedding_dict and key2 in embedding_dict:
-                        current.append(embedding_dict[key1].dot(embedding_dict[key2])) 
-                    else:
-                        assert key1 in embedding_dict, key1+' does not exist.'
-                        assert key2 in embedding_dict, key2+' does not exist.'
+                    assert key1 in embedding_dict, key1+' does not exist.'
+                    assert key2 in embedding_dict, key2+' does not exist.'
+                    current.append(embedding_dict[key1].dot(embedding_dict[key2])) 
                 if count==sample_number:
                     if exist:
                         edge_type=line_split[-1]

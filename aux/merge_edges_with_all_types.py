@@ -30,7 +30,5 @@ with open(input_ref_file, "r") as f_in, open(output_file, "w") as f_out:
         line_split = line.strip().split()
         typed_node_pair = "|".join([line_split[0],line_split[1],line_split[3]])
 
-        if typed_node_pair not in typed_node_pair_to_line_dict:
-            print "Warning: %s not in score files." % typed_node_pair
-        else:
-            f_out.write(typed_node_pair_to_line_dict[typed_node_pair])
+        assert typed_node_pair in typed_node_pair_to_line_dict, "%s not in score files." % typed_node_pair
+        f_out.write(typed_node_pair_to_line_dict[typed_node_pair])
