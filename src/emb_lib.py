@@ -29,20 +29,19 @@ class SkipGram(object):
 		self.dump_timer = arg['dump_timer']
 		self.model_dir = arg['model_dir']
 		self.more_param = arg['more_param']
-		#enable batch normalization
+		self.fine_tune = arg['fine_tune']
+		self.lr = arg['lr']
+		self._params = []
 		if self.map_mode != -1:
-			_params = [{'params': self.neg_loss.in_embed.parameters()}, 
+			self._params = [{'params': self.neg_loss.in_embed.parameters()}, 
 				{'params': self.neg_loss.out_embed.parameters()}]
 			for i in xrange(len(self.neg_loss.edge_mapping)):
-				_params.append({'params': self.neg_loss.edge_mapping[i].parameters(),
-					#'lr': arg['lr'] * 1})
+				self._params.append({'params': self.neg_loss.edge_mapping[i].parameters(),
 					'lr': arg['lr'] * arg['lr_ratio'] * (float(len(self.input))) / (type_offset['sum'] * edge_stats[i] + 1e-6)})
-			self.SGD = optim.SGD(_params, lr = arg['lr'])
-			#self.edge_lr_ratio = arg['lr_ratio']
+		if self.map_mode != -1:
+			self.SGD = optim.SGD(self._params, lr = self.lr)
 		else:
-			# mode <=0, with 
-			self.SGD = optim.SGD(self.neg_loss.parameters(), lr = arg['lr'])
-
+			self.SGD = optim.SGD(self.neg_loss.parameters(), lr = self.lr)
 		self.window_size = arg['window_size']
 		self.graph_name = arg['graph_name']
 		
@@ -51,17 +50,30 @@ class SkipGram(object):
 		self.iter = arg['iter']
 		self.neg_ratio = arg['neg_ratio']
 	
-	def get_params(self):		
-		for param in self.neg_loss.in_emb.parameters():
-			yield param
+	# support fine tune 
+	def freeze_embedding(self):
+		for param in self.neg_loss.in_embed.parameters():
+			param.requires_grad = False
+		for param in self.neg_loss.out_embed.parameters():
+			param.requires_grad = False
+
+	# support fine tune
+	def update_embedding(self):
+		for param in self.neg_loss.in_embed.parameters():
+			param.requires_grad = True
+		for param in self.neg_loss.out_embed.parameters():
+			param.requires_grad = True
 
 	def train(self):
 		self.neg_loss.train()
+		self.freeze_embedding()
 		with open(self.model_dir + 'heer_' + self.graph_name + '_op_' + str(self.mode) + 
-						'_mode_' + str(self.map_mode)+ '.log', 'w') as LOG:
+						'_mode_' + str(self.map_mode)+ '_' + self.more_param + '.log', 'w') as LOG:
 			for epoch in xrange(self.iter):
 				loss_sum = 0
-
+				if epoch == self.fine_tune:
+					self.update_embedding()
+					print("finish fine tuning")
 				for i, data in enumerate(self.data, 0):
 					inputs, labels = data
 					loss, pure_loss = self.neg_loss(inputs, labels, self.neg_ratio)
@@ -73,8 +85,8 @@ class SkipGram(object):
 					
 					loss.backward()
 					
-					#utils.clip_sparse_grad_norm(self.neg_loss.in_embed.parameters(), 0.1)
-					#utils.clip_sparse_grad_norm(self.neg_loss.out_embed.parameters(), 0.1)
+					# utils.clip_sparse_grad_norm(self.neg_loss.in_embed.parameters(), 0.1)
+					# utils.clip_sparse_grad_norm(self.neg_loss.out_embed.parameters(), 0.1)
 					
 					#for i in xrange(len(self.neg_loss.edge_mapping)):
 					#	utils.clip_grad_norm(self.neg_loss.edge_mapping[i].parameters(), 0.1)

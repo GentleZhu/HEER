@@ -1,7 +1,10 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.nn import Parameter
+
 import numpy as np
+
 import cPickle
 import ast
 
@@ -112,3 +115,31 @@ class SymmLinear(nn.Module):
         # See the autograd section for explanation of what happens here.
         print(input.size(), self.weight.size())
         return input * (self.weight.transpose(0, 1) + self.weight)
+
+class DeepSemantics(nn.Module):
+    """
+    Multi-layer edge metrics
+    """
+    def __init__(self, in_features, out_features, hidden_features, bias=False):
+        super(DeepSemantics, self).__init__()
+
+        if bias:
+            self.fc1 = nn.Linear(in_features, hidden_features, bias = bias)
+            self.fc2 = nn.Linear(hidden_features, out_features, bias = bias)
+        else:
+            self.fc1 = nn.Linear(in_features, hidden_features)
+            self.fc2 = nn.Linear(hidden_features, out_features)
+        
+        self.fc1.weight.data.uniform_(-0.5, 0.5)
+        self.fc2.weight.data.uniform_(-0.5, 0.5)
+        self.fc1_bn = nn.BatchNorm1d(hidden_features)
+        self.fc2_bn = nn.BatchNorm1d(out_features)
+
+    def forward(self, x):
+        if x.size(0) == 1:
+            x = F.relu(self.fc1(x))
+            return self.fc2(x)
+        else:
+            x = F.relu(self.fc1_bn(self.fc1(x)))
+            return self.fc2_bn(self.fc2(x))
+        
