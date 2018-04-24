@@ -40,20 +40,25 @@ else
 	fast=0
 fi
 
+per_type_cur_model_dir="$root_dir"/intermediate_data/per_type_temp/"$network"_"$operator"_"$map"_"$more_param"_"$time_start"
+mkdir -p "$per_type_cur_model_dir"
+
 echo ${yellow}===HEER Testing===${reset}
-python2 "$root_dir"/aux/separate_edges_by_types.py --input-file=$eval_file --output-dir="$root_dir"/intermediate_data/
+python2 "$root_dir"/aux/separate_edges_by_types.py --input-file=$eval_file --output-dir="$per_type_cur_model_dir"/
 
 curr_step=0
 until [  $curr_step -gt $((epoch - 1)) ]; do
 	echo $curr_step
 	python2 "$root_dir"/src/pred.py --iter=$curr_step --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/intermediate_data/model/ \
 	--pre-train-path="$root_dir"/intermediate_data/pretrained_"$network".emb --more-param="$more_param" \
-	--map_func=$map --gpu=$gpu --op=$operator --test-dir="$root_dir"/intermediate_data/ --fast=$fast >> test.log
+	--map_func=$map --gpu=$gpu --op=$operator --test-dir="$per_type_cur_model_dir"/ --fast=$fast
 
-	python2 "$root_dir"/aux/merge_edges_with_all_types.py --input-ref-file $eval_file --input-score-dir "$root_dir"/intermediate_data/ --input-score-keywords "$network"_pred --output-file "$root_dir"/intermediate_data/heer_"$network"_"$curr_step"_"$operator"_"$map"_"$more_param".txt
+	python2 "$root_dir"/aux/merge_edges_with_all_types.py --input-ref-file $eval_file --input-score-dir "$per_type_cur_model_dir" --input-score-keywords "$network"_pred --output-file "$root_dir"/intermediate_data/heer_"$network"_"$curr_step"_"$operator"_"$map"_"$more_param".txt
+
+	rm "$per_type_cur_model_dir"/*"$network"_pred*
+
 	bash "$root_dir"/run/eval_heer.sh $network $curr_step $operator $map $more_param $time_start  # add $time_start to gen files for plots when running 
 	
 	let " curr_step += dump_timer "
 done
-
-
+rm -r "$per_type_cur_model_dir"
