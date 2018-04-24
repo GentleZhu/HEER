@@ -94,8 +94,8 @@ def learn_embeddings():
 		for i in xrange(0, len(more_param_list), 2):
 			more_param_dict[more_param_list[i]] = more_param_list[i+1]
 	rescale_factor = 1. if 'rescale' not in more_param_dict else float(more_param_dict['rescale'])
-	learning_rate = 2.5 if 'lr' not in more_param_dict else float(more_param_dict['lr'])
-	learning_rate_ratio = 1. if 'lrr' not in more_param_dict else float(more_param_dict['lrr'])
+	learning_rate = 1. if 'lr' not in more_param_dict else float(more_param_dict['lr'])  # please keep default values consistent with records on our google spreadsheet
+	learning_rate_ratio = 16. if 'lrr' not in more_param_dict else float(more_param_dict['lrr'])  # please keep default values consistent with records on our google spreadsheet
 
 	_data = ''
 	if len(args.pre_train_path) > 0:
