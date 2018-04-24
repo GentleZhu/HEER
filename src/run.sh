@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #e.g. bash ./src/run.sh yago_ko_0.4 20 1 0 yago 7
+# bash ./src/run.sh yago_ko_0.4 11 1 3 deep_exp 2
 
 green=`tput setaf 2`
 red=`tput setaf 1`
@@ -35,7 +36,8 @@ if [ ! -e  "$root_dir"/intermediate_data/"$network$SUFFIX" ]; then
 		--graph-name=$network --data-dir="$root_dir"/intermediate_data/
 fi
 echo ${red}===HEER Training===${reset}
-python ./src/main.py --iter=$2 --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/model/ \
---pre-train-path="$root_dir"/intermediate_data/pretrained_"$network".emb \
---dump-timer=$dump_timer --map_func=$map --op=$operator --gpu=$gpu --more-param="$more_param"
+python ./src/main.py --iter=$2 --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/intermediate_data/model/ \
+--dump-timer=$dump_timer --map_func=$map --op=$operator --gpu=$gpu --more-param="$more_param" --log-dir="$root_dir"/log/ \
+--pre-train-path="$root_dir"/intermediate_data/pretrained_"$network".emb --fine-tune=0
+
 

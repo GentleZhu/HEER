@@ -28,6 +28,7 @@ class SkipGram(object):
 		self.map_mode = arg['map_mode']
 		self.dump_timer = arg['dump_timer']
 		self.model_dir = arg['model_dir']
+		self.log_dir = arg['log_dir']
 		self.more_param = arg['more_param']
 		self.fine_tune = arg['fine_tune']
 		self.lr = arg['lr']
@@ -67,7 +68,7 @@ class SkipGram(object):
 	def train(self):
 		self.neg_loss.train()
 		self.freeze_embedding()
-		with open(self.model_dir + 'heer_' + self.graph_name + '_op_' + str(self.mode) + 
+		with open(self.log_dir + 'heer_' + self.graph_name + '_op_' + str(self.mode) + 
 						'_mode_' + str(self.map_mode)+ '_' + self.more_param + '.log', 'w') as LOG:
 			for epoch in xrange(self.iter):
 				loss_sum = 0

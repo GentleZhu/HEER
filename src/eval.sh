@@ -46,7 +46,7 @@ python2 "$root_dir"/aux/separate_edges_by_types.py --input-file=$eval_file --out
 curr_step=0
 until [  $curr_step -gt $((epoch - 1)) ]; do
 	echo $curr_step
-	python2 "$root_dir"/src/pred.py --iter=$curr_step --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/model/ \
+	python2 "$root_dir"/src/pred.py --iter=$curr_step --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/intermediate_data/model/ \
 	--pre-train-path="$root_dir"/intermediate_data/pretrained_"$network".emb --more-param="$more_param" \
 	--map_func=$map --gpu=$gpu --op=$operator --test-dir="$root_dir"/intermediate_data/ --fast=$fast >> test.log
 
