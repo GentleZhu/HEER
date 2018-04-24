@@ -40,20 +40,28 @@ class NEG_loss(nn.Module):
         self.out_embed = nn.Embedding(self.num_classes, self.embed_size, sparse=True)
 
 
-        self.out_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
-        self.in_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-1, 1).cuda())
+        self.out_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-0.1, 0.1).cuda())
+        self.in_embed.weight = Parameter(t.FloatTensor(self.num_classes, self.embed_size).uniform_(-0.1, 0.1).cuda())
 
         if len(pre_train_path) > 0:
             self.in_embed.weight.data.copy_(t.from_numpy(pre_train_path))
             self.out_embed.weight.data.copy_(t.from_numpy(pre_train_path))
+            #self.in_embed.weight.data.div_(10)
+            #self.out_embed.weight.data.div_(10)
             print('pre-train embedding loaded!')
 
         
         if self.map_mode > -1: 
             for tp in edge_types:
-                self.edge_mapping.append(self.genMappingLayer(self.mode))
+                self.edge_mapping.append(self.genMappingLayer(self.map_mode))
+                """
                 if self.map_mode > 0:
-                    self.edge_mapping_bn.append(nn.BatchNorm1d(self.embed_size).cuda())
+                    self.edge_mapping_bn.append(nn.BatchNorm1d(self.embed_size, affine=True).cuda())
+                    self.edge_mapping_bn[-1].weight.data.fill_(1)
+                    self.edge_mapping_bn[-1].bias.data.zero_()
+                    self.edge_mapping_bn[-1].register_parameter('bias', None)
+                """
+
                 #if self.mode == -2:
                     #self.edge_mapping_bn.append(nn.Dropout().cuda())
         
@@ -62,31 +70,32 @@ class NEG_loss(nn.Module):
         #print(self.type_offset)
 
     def genMappingLayer(self, mode):
+        """
+        mode -4: vanilla linear on addition
+        mode -3: vanilla linear on deduction
+        mode -2: vanilla linear on outer-product
+        mode -1: unimetric
+        mode 0: vanilla linear(scale) layer
+        mode 1: vanilla batch normalization layer
+        mode 2: deeper metric
+        """
         _layer = None
-        if mode != 2:
-            if self.map_mode < 3: 
+        if mode == -1:
+            return _layer
+        else:
+            if mode == 0:
                 _layer = utils.DiagLinear(self.embed_size).cuda()
                 _layer.weight = Parameter(t.FloatTensor(self.embed_size).fill_(1.0).cuda())
-            else:
-                _layer = nn.Linear(self.embed_size, self.embed_size).cuda()
-                _layer.weight = Parameter(t.FloatTensor(self.embed_size, self.embed_size).fill_(1.0 / self.embed_size).cuda())
-        elif mode == 2:
-            _layer = utils.SymmLinear(self.embed_size).cuda()
-            #_layer.weight = Parameter(t.FloatTensor(self.embed_size * self.embed_size).fill_(1.0).cuda())
-            _layer.weight = Parameter(t.eye(self.embed_size).view(-1, self.embed_size ** 2).cuda())
+            if mode == 2:
+                _layer = utils.DeepSemantics(self.embed_size, self.embed_size, self.embed_size, bias = True).cuda()
         return _layer
 
     def edge_map(self, x, tp):
+        
         if self.map_mode == -1:
             return x
-        elif self.map_mode == 0:
+        else:
             return self.edge_mapping[tp](x)
-        #batch normalization
-        elif self.map_mode == 1 or self.map_mode == 3:
-            return self.edge_mapping[tp](x) if x.size()[0] == 1 else self.edge_mapping_bn[tp](self.edge_mapping[tp](x))
-        #batch normalization + ReLu
-        elif self.map_mode == 2:
-            return F.relu(self.edge_mapping[tp](x)) if x.size()[0] == 1 else F.relu(self.edge_mapping_bn[tp](self.edge_mapping[tp](x)))
 
     def edge_rep(self, input_a, input_b):
         #mode 1: hadamard-product
@@ -203,8 +212,8 @@ class NEG_loss(nn.Module):
 
             
             edge_reg_loss = 0.0
-            if self.map_mode >= 0:
-                edge_reg_loss += self.edge_mapping[tp].weight.mul(self.edge_mapping[tp].weight).sum()
+            #if self.map_mode >= 0:
+            #    edge_reg_loss += self.edge_mapping[tp].weight.mul(self.edge_mapping[tp].weight).sum()
             reg_loss += sub_batch_size * edge_reg_loss
 
             loss_sum -= (loss - self.weight_decay * reg_loss)

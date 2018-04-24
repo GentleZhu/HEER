@@ -38,6 +38,8 @@ def parse_args():
 
 	parser.add_argument('--pre-train-path', type=str, default='',
                     	help='embedding initialization')
+	parser.add_argument('--pre-load-model', type=str, default=None,
+                    	help='module initialization')
 
 	parser.add_argument('--build-graph', type=bool, default=False,
                     	help='heterogeneous information network construction')
@@ -48,6 +50,8 @@ def parse_args():
                     	help='data directory')
 	parser.add_argument('--model-dir', type=str, default='',
                     	help='model directory')
+	parser.add_argument('--fine-tune', type=int, default=0,
+                    	help='fine tune phase')
 
 	parser.add_argument('--node-types', type=list, default=['PR', 'AD', 'WO', 'AS', 'GE', 'PE', 'EV', 'PO'])
 
@@ -99,11 +103,15 @@ def learn_embeddings():
 	model = SkipGram({'emb_size':args.dimensions,
 		'window_size':1, 'batch_size':args.batch_size, 'iter':args.iter, 'neg_ratio':5,
 		'graph_name':args.graph_name, 'dump_timer':args.dump_timer, 'model_dir':args.model_dir,
-		'data_dir':args.data_dir, 'mode':args.op, 'map_mode':args.map_func,
+		'data_dir':args.data_dir, 'mode':args.op, 'map_mode':args.map_func,'fine_tune':args.fine_tune,
 		'lr_ratio':learning_rate_ratio, 'lr': learning_rate, 'network':_network, 'more_param': args.more_param,
 		'pre_train':_data, 'node_types':config['nodes'], 'edge_types':config['edges']})
 	
-
+	if args.pre_load_model:
+		pre_load_model = t.load(args.pre_load_model, map_location=lambda storage, loc: storage)
+		model.neg_loss.load_state_dict(pre_load_model)
+		model.cuda()
+	
 	model.train()
 	
 	return
