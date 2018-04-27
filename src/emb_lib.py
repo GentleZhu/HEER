@@ -39,10 +39,7 @@ class SkipGram(object):
 			for i in xrange(len(self.neg_loss.edge_mapping)):
 				self._params.append({'params': self.neg_loss.edge_mapping[i].parameters(),
 					'lr': arg['lr'] * arg['lr_ratio'] * (float(len(self.input))) / (type_offset['sum'] * edge_stats[i] + 1e-6)})
-		if self.map_mode != -1:
-			self.SGD = optim.SGD(self._params, lr = self.lr)
-		else:
-			self.SGD = optim.SGD(self.neg_loss.parameters(), lr = self.lr)
+		
 		self.window_size = arg['window_size']
 		self.graph_name = arg['graph_name']
 		
@@ -53,17 +50,22 @@ class SkipGram(object):
 	
 	# support fine tune 
 	def freeze_embedding(self):
+		self.SGD = optim.SGD(self.neg_loss.parameters(), lr = self.lr)
 		for param in self.neg_loss.in_embed.parameters():
 			param.requires_grad = False
 		for param in self.neg_loss.out_embed.parameters():
 			param.requires_grad = False
-
+		
 	# support fine tune
 	def update_embedding(self):
 		for param in self.neg_loss.in_embed.parameters():
 			param.requires_grad = True
 		for param in self.neg_loss.out_embed.parameters():
 			param.requires_grad = True
+		if self.map_mode != -1:
+			self.SGD = optim.SGD(self._params, lr = self.lr)
+		else:
+			self.SGD = optim.SGD(self.neg_loss.parameters(), lr = self.lr)
 
 	def train(self):
 		self.neg_loss.train()
@@ -74,7 +76,8 @@ class SkipGram(object):
 				loss_sum = 0
 				if epoch == self.fine_tune:
 					self.update_embedding()
-					print("finish fine tuning")
+					if self.map_mode > 1:
+						print("finish fine tuning for deep edge archs")
 				for i, data in enumerate(self.data, 0):
 					inputs, labels = data
 					loss, pure_loss = self.neg_loss(inputs, labels, self.neg_ratio)

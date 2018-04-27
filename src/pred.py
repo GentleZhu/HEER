@@ -145,8 +145,12 @@ if __name__ == '__main__':
 					_type_b, _id_b = node[1].split(':')
 					#print(_type_a, _id_a)
 					#if _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]:
-					_input.append(in_mapping[_type_a][_id_a] + type_offset[_type_a])
-					_output.append(in_mapping[_type_b][_id_b] + type_offset[_type_b])
+					if config['edges'][idx][2] == 1 and '-1' in prefix:
+						_output.append(in_mapping[_type_a][_id_a] + type_offset[_type_a])
+						_input.append(in_mapping[_type_b][_id_b] + type_offset[_type_b])
+					else:
+						_input.append(in_mapping[_type_a][_id_a] + type_offset[_type_a])
+						_output.append(in_mapping[_type_b][_id_b] + type_offset[_type_b])
 					#else:
 						#print(line)
 					#	continue
@@ -163,7 +167,7 @@ if __name__ == '__main__':
 			#pbar = tqdm(total=len(data_reader) / args.batch_size)
 			for i, data in enumerate(data_reader, 0):
 				inputs, labels = data
-				loss = model.predict(inputs, labels, tp, config['edges'][idx][0] == config['edges'][idx][1])
+				loss = model.predict(inputs, labels, tp)
 				score += loss
 				#pbar.update(1)
 			#pbar.close()

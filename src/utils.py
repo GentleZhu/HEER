@@ -120,23 +120,23 @@ class DeepSemantics(nn.Module):
     """
     Multi-layer edge metrics
     """
-    def __init__(self, in_features, out_features, hidden_features, bias=False):
+    def __init__(self, in_features, out_features, hidden_features, bias=False, norm=False):
         super(DeepSemantics, self).__init__()
 
-        if bias:
-            self.fc1 = nn.Linear(in_features, hidden_features, bias = bias)
-            self.fc2 = nn.Linear(hidden_features, out_features, bias = bias)
-        else:
-            self.fc1 = nn.Linear(in_features, hidden_features)
-            self.fc2 = nn.Linear(hidden_features, out_features)
+        self.fc1 = nn.Linear(in_features, hidden_features, bias = bias)
+        self.fc2 = nn.Linear(hidden_features, out_features, bias = bias)
         
-        self.fc1.weight.data.uniform_(-0.5, 0.5)
-        self.fc2.weight.data.uniform_(-0.5, 0.5)
+        #self.fc1.weight.data.uniform_(-0.5, 0.5)
+        #self.fc2.weight.data.uniform_(-0.5, 0.5)
         self.fc1_bn = nn.BatchNorm1d(hidden_features)
         self.fc2_bn = nn.BatchNorm1d(out_features)
+        self.norm = norm
+        if not bias:
+            self.fc1_bn.register_parameter('bias', None)
+            self.fc2_bn.register_parameter('bias', None)
 
     def forward(self, x):
-        if x.size(0) == 1:
+        if x.size(0) == 1 or not self.norm:
             x = F.relu(self.fc1(x))
             return self.fc2(x)
         else:

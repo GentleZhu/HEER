@@ -87,7 +87,7 @@ class NEG_loss(nn.Module):
                 _layer = utils.DiagLinear(self.embed_size).cuda()
                 _layer.weight = Parameter(t.FloatTensor(self.embed_size).fill_(1.0).cuda())
             if mode == 2:
-                _layer = utils.DeepSemantics(self.embed_size, self.embed_size, self.embed_size, bias = True).cuda()
+                _layer = utils.DeepSemantics(self.embed_size, 20, 50, bias=False).cuda()
         return _layer
 
     def edge_map(self, x, tp):
@@ -221,7 +221,7 @@ class NEG_loss(nn.Module):
 
         return loss_sum / (2 * batch_size), pure_loss / (2 * batch_size)
 
-    def predict(self, inputs, outputs, tp, directed = False):
+    def predict(self, inputs, outputs, tp):
         use_cuda = True
         if use_cuda:
             inputs = inputs.cuda()
