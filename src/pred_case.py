@@ -30,7 +30,8 @@ def parse_args():
                     	help='embedding initialization')
 	parser.add_argument('--batch-size', type=int, default=50,
 	                    help='Batch size. Default is 50.')
-
+	parser.add_argument('--iter', default=500, type=int,
+                      help='Number of epochs in dumped model')
 	parser.add_argument('--graph-name', type=str, default='',
                     	help='prefix of dumped data')
 	parser.add_argument('--data-dir', type=str, default='',
@@ -42,8 +43,6 @@ def parse_args():
 	parser.add_argument('--sub-net', type=str, default='',
                     	help='sub network path')
 	parser.add_argument('--dump-timer', default=5, type=int)
-	parser.add_argument('--iter', default=500, type=int,
-                      help='Number of epochs in SGD')
 	parser.add_argument('--op', default=0, type=int)
 	parser.add_argument('--map_func', default=0, type=int)
 	parser.set_defaults(directed=False)
@@ -129,17 +128,18 @@ if __name__ == '__main__':
 			#pbar = tqdm(total=len(data_reader) / args.batch_size)
 			for i, data in enumerate(data_reader, 0):
 				inputs, labels = data
-				loss = model.predict(inputs, labels, types.index(tp))
+				loss = model.predict(inputs, labels, config['types'].index(tp))
 				score += loss
 				#pbar.update(1)
 			#pbar.close()
 
-			with open(args.sub_net) as INPUT, open(args.sub_net.replace('.hin', '_'+str(args.iter)+'_'+tp+'.txt', 'w')) as OUTPUT:
+			with open(args.sub_net) as INPUT, open(args.sub_net.replace('.hin', '_'+str(args.iter)+'_'+tp+'.txt'), 'w') as OUTPUT:
 				for i, line in enumerate(INPUT):
 					node = line.strip().split(' ')
 					_type_a, _id_a = node[0].split(':')
 					_type_b, _id_b = node[1].split(':')
 					assert _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]
 					node[2] = str(score[i])
+					node[3] = tp
 					OUTPUT.write(' '.join(node) + '\n')
 
