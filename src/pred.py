@@ -136,6 +136,10 @@ if __name__ == '__main__':
 		tp = idx
 	#APYWV
 		for prefix in edge_prefix:
+			input_eval_file = args.test_dir + prefix + suffix
+			if not os.path.isfile(input_eval_file):  # hack for baselines
+				print("WARNING: Input eval file " + input_eval_file + "does not exist. To skip this edge type.")
+				continue
 			with open(args.test_dir + prefix + suffix, 'r') as INPUT:
 				_input = []
 				_output = []
