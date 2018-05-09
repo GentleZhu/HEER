@@ -143,6 +143,7 @@ if __name__ == '__main__':
 			with open(args.test_dir + prefix + suffix, 'r') as INPUT:
 				_input = []
 				_output = []
+				num_unseen_cases = 0
 				for line in INPUT:
 					node = line.strip().split(' ')
 					_type_a, _id_a = node[0].split(':')
@@ -150,10 +151,12 @@ if __name__ == '__main__':
 					#print(_type_a, _id_a)
 					#if _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]:
 					if _id_a not in in_mapping[_type_a]:  # hack for baselines
-						print("WARNING: type " + _type_a + " _id " + _id_a + " does not exist in in_mapping. To skip this evaluation instance.")
+						#print("WARNING: type " + _type_a + " _id " + _id_a + " does not exist in in_mapping. To skip this evaluation instance.")
+						num_unseen_cases += 1
 						continue
 					if _id_b not in in_mapping[_type_b]:
-						print("WARNING: type " + _type_b + " _id " + _id_b + " does not exist in in_mapping. To skip this evaluation instance.")
+						#print("WARNING: type " + _type_b + " _id " + _id_b + " does not exist in in_mapping. To skip this evaluation instance.")
+						num_unseen_cases += 1
 						continue
 					if config['edges'][idx][2] == 1 and '-1' in prefix:
 						_output.append(in_mapping[_type_a][_id_a] + type_offset[_type_a])
@@ -164,6 +167,9 @@ if __name__ == '__main__':
 					#else:
 						#print(line)
 					#	continue
+				if num_unseen_cases > 0:
+					print("WARNING: " + str(num_unseen_cases) + " unseen cases exist in in_mapping, which are skipped.")
+
 
 			if len(_input) == 0:
 				print("no this type! in test")
@@ -183,12 +189,18 @@ if __name__ == '__main__':
 			#pbar.close()
 
 			with open(args.test_dir + prefix + suffix, 'r') as INPUT, open(args.test_dir + prefix + suffix.replace('eval', 'pred'), 'w') as OUTPUT:
+				num_unseen_cases = 0
 				for i, line in enumerate(INPUT):
 					node = line.strip().split(' ')
 					_type_a, _id_a = node[0].split(':')
 					_type_b, _id_b = node[1].split(':')
-					assert _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]
-					node[2] = str(score[i])
+					if _id_a not in in_mapping[_type_a] or _id_b not in in_mapping[_type_b]:  # hack for baselines
+						num_unseen_cases += 1
+						node[2] = str(0.5)
+					else:
+						node[2] = str(score[i - num_unseen_cases])
+					#assert _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]
+					#node[2] = str(score[i - num_unseen_cases])
 					OUTPUT.write(' '.join(node) + '\n')
 				#assert cnt == len(score)
 			
