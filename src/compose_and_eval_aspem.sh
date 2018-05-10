@@ -49,7 +49,7 @@ curr_step=0
 until [  $curr_step -gt $((epoch - 1)) ]; do
 	echo $curr_step
 
-	python2 "$root_dir"/src/merge_score_aspem_from_per_aspect_score.py "$eval_file" "$root_dir"/intermediate_data/heer_"$network"_aspect_"$aspect_number_1"_"$curr_step"_"$operator"_"$map"_"$more_param".txt "$root_dir"/intermediate_data/heer_"$network"_aspect_"$aspect_number_2"_"$curr_step"_"$operator"_"$map"_"$more_param".txt "$root_dir"/intermediate_data/heer_"$network"_aspect_"$aspect_number_1"and"$aspect_number_2"_"$curr_step"_"$operator"_"$map"_"$more_param".txt
+	python2 "$root_dir"/aux/merge_score_aspem_from_per_aspect_score.py "$eval_file" "$root_dir"/intermediate_data/heer_"$network"_aspect_"$aspect_number_1"_"$curr_step"_"$operator"_"$map"_"$more_param".txt "$root_dir"/intermediate_data/heer_"$network"_aspect_"$aspect_number_2"_"$curr_step"_"$operator"_"$map"_"$more_param".txt "$root_dir"/intermediate_data/heer_"$network"_aspect_"$aspect_number_1"and"$aspect_number_2"_"$curr_step"_"$operator"_"$map"_"$more_param".txt
 
 	bash "$root_dir"/run/eval_heer_aspem.sh $network $curr_step $operator $map $more_param $time_start "$aspect_number_1"and"$aspect_number_2"  # add $time_start to gen files for plots when running 
 
