@@ -8,6 +8,7 @@ output_score = sys.argv[4]
 
 score_1_dict={}
 with open(input_score_1, "r") as f_in:
+    f_in.readline()
     for line in f_in:
         node_1, node_2, score, edge_type = line.strip().split()
         score_1_dict[(node_1, node_2, edge_type)] = float(score)
@@ -16,7 +17,7 @@ print ("Score from the first aspect loading done.")
 
 score_2_dict={}
 with open(input_score_2, "r") as f_in:
-    #num_nodes, dim = map(int, f_in.readline().strip().split())  # first line is special
+    f_in.readline()
     for line in f_in:
         node_1, node_2, score, edge_type = line.strip().split()
         score_2_dict[(node_1, node_2, edge_type)] = float(score)
