@@ -56,7 +56,7 @@ until [  $curr_step -gt $((epoch - 1)) ]; do
 
 	python2 "$root_dir"/aux/merge_edges_with_all_types.py --input-ref-file $eval_file --input-score-dir "$per_type_cur_model_dir" --input-score-keywords "$network"_aspect_"$aspect_number"_pred --output-file "$root_dir"/intermediate_data/heer_"$network"_aspect_"$aspect_number"_"$curr_step"_"$operator"_"$map"_"$more_param".txt
 
-	rm -r "$per_type_cur_model_dir"
-
 	let " curr_step += dump_timer "
 done
+
+rm -r "$per_type_cur_model_dir"
