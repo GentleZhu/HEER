@@ -8,3 +8,4 @@ log/
 output/
 pretrain/line
 *.o
+archive/

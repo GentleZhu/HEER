@@ -137,27 +137,15 @@ if __name__ == '__main__':
 	#APYWV
 		for prefix in edge_prefix:
 			input_eval_file = args.test_dir + prefix + suffix
-			if not os.path.isfile(input_eval_file):  # hack for baselines
-				print("WARNING: Input eval file " + input_eval_file + " does not exist. To skip this edge type.")
-				continue
 			with open(args.test_dir + prefix + suffix, 'r') as INPUT:
 				_input = []
 				_output = []
-				num_unseen_cases = 0
 				for line in INPUT:
 					node = line.strip().split(' ')
 					_type_a, _id_a = node[0].split(':')
 					_type_b, _id_b = node[1].split(':')
 					#print(_type_a, _id_a)
 					#if _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]:
-					if _id_a not in in_mapping[_type_a]:  # hack for baselines
-						#print("WARNING: type " + _type_a + " _id " + _id_a + " does not exist in in_mapping. To skip this evaluation instance.")
-						num_unseen_cases += 1
-						continue
-					if _id_b not in in_mapping[_type_b]:
-						#print("WARNING: type " + _type_b + " _id " + _id_b + " does not exist in in_mapping. To skip this evaluation instance.")
-						num_unseen_cases += 1
-						continue
 					if config['edges'][idx][2] == 1 and '-1' in prefix:
 						_output.append(in_mapping[_type_a][_id_a] + type_offset[_type_a])
 						_input.append(in_mapping[_type_b][_id_b] + type_offset[_type_b])
@@ -194,13 +182,8 @@ if __name__ == '__main__':
 					node = line.strip().split(' ')
 					_type_a, _id_a = node[0].split(':')
 					_type_b, _id_b = node[1].split(':')
-					if _id_a not in in_mapping[_type_a] or _id_b not in in_mapping[_type_b]:  # hack for baselines
-						num_unseen_cases += 1
-						node[2] = str(0.5)
-					else:
-						node[2] = str(score[i - num_unseen_cases])
-					#assert _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]
-					#node[2] = str(score[i - num_unseen_cases])
+					assert _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]
+					node[2] = str(score[i])
 					OUTPUT.write(' '.join(node) + '\n')
 				#assert cnt == len(score)
 			

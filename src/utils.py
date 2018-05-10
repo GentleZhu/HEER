@@ -30,8 +30,6 @@ def load_emb(root_dir, emb_path, emb_size, graph_name, node_types):
         for line in INPUT:
             node = line.strip().split(' ')
             _type, _id = node[0].split(':')
-            if _type not in in_mapping or _id not in in_mapping[_type]:  # hack for baselines
-                continue
             _index = in_mapping[_type][_id] + type_offset[_type]
             _data[_index, :] = np.asarray(map(lambda x:float(x), node[1:]))
     return _data
