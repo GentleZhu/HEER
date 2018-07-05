@@ -8,7 +8,6 @@ Heterogeneous Information Networks](http://yushi2.web.engr.illinois.edu/kdd18.pd
 * [PyTorch 4.0](https://pytorch.org/)
 
 ## Data
-### HIN datasets
 We use two publicly available real-world HIN datasets: DBLP and YAGO. We provide processed data links to reproduce our results. 
 * **DBLP** ([Tang et al., 2008](https://dl.acm.org/citation.cfm?id=1402008)): DBLP is a bibliographical network in the computer science domain. There are five types of nodes in the network: author, paper, key term, venue, and year. The edge types include authorship (aut.), term usage (term), publishing venue(ven.), and publishing year (year) of a paper, and the reference relationship from a paper to another (ref.). [[download](https://s3.us-east-2.amazonaws.com/heer-data/dblp.zip)] [[pretrained LINE embeddings](https://s3.us-east-2.amazonaws.com/heer-data/pretrained_dblp_emb.zip)]
 * **YAGO** ([Suchanek et al., 2007](https://suchanek.name/work/publications/www2007.pdf)): YAGO is a large-scale knowledge graph derived from Wikipedia, WordNet, and GeoNames. There are seven types of nodes in the network: person, location, organization, piece of work, prize, position, and event. A total of 24 edge types exist in the network, with five being directed and others being undirected. [[download](https://s3.us-east-2.amazonaws.com/heer-data/yago.zip)] [[pretrained LINE embeddings](https://s3.us-east-2.amazonaws.com/heer-data/pretrained_yago_emb.zip)]
