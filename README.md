@@ -3,8 +3,6 @@
 Source code and data for KDD'18 paper *[Easing Embedding Learning by Comprehensive Transcription of
 Heterogeneous Information Networks](http://yushi2.web.engr.illinois.edu/kdd18.pdf)*. 
 ## Dependencies
-
-We will take Ubuntu for example.
 * python 2.7
 * python 3.5
 * [PyTorch 4.0](https://pytorch.org/)
