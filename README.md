@@ -1,7 +1,7 @@
 # HEER: Easing Embedding Learning by Comprehensive Transcription of Heterogeneous Information Networks
 
 Source code and data for KDD'18 paper *[Easing Embedding Learning by Comprehensive Transcription of
-Heterogeneous Information Networks](http://yushi2.web.engr.illinois.edu/kdd18.pdf)*. 
+Heterogeneous Information Networks](https://arxiv.org/abs/1807.03490)*. 
 ## Dependencies
 * python 2.7
 * python 3.5
