@@ -66,8 +66,6 @@ class NEG_loss(nn.Module):
                     #self.edge_mapping_bn.append(nn.Dropout().cuda())
         
         self.type_offset.append(type_offset['sum'])
-        print(self.type_offset)
-        #print(self.type_offset)
 
     def genMappingLayer(self, mode):
         """

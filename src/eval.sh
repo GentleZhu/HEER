@@ -12,12 +12,11 @@ reset=`tput sgr0`
 # input variables
 network=$1  # a.k.a. graph_name; e.g., yago_ko_0.2
 epoch=$2  # number of epochs
-operator=$3  # operator used to compose edge embedding from node embeddings
-map=$4  # mapping on top of edge embedding
-more_param=$5  # more customized parameters
-gpu=$6 # working gpu for prediction
-dump_timer=${7:-2} # default dump timer
-
+operator=${3:-1}  # operator used to compose edge embedding from node embeddings
+map=${4:-0}  # mapping on top of edge embedding
+more_param=${5:-rescale_0.1_lr_10_lrr_10}  # more customized parameters
+gpu=${6:-0} # working gpu for prediction
+dump_timer=${7:-6} # default dump timer
 
 # find relative root directory
 SOURCE="${BASH_SOURCE[0]}"
