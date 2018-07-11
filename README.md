@@ -2,6 +2,8 @@
 
 Source code and data for KDD'18 paper *[Easing Embedding Learning by Comprehensive Transcription of
 Heterogeneous Information Networks](https://arxiv.org/abs/1807.03490)*. 
+
+KDD promotional video *[Click Here!](https://m.youtube.com/watch?v=LsOHdQ1Xdn8&feature=youtu.be)*
 ## Dependencies
 * python 2.7
 * python 3.5
