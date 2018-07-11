@@ -5,7 +5,7 @@ Heterogeneous Information Networks](http://yushi2.web.engr.illinois.edu/kdd18.pd
 ## Dependencies
 * python 2.7
 * python 3.5
-* [PyTorch 4.0](https://pytorch.org/)
+* [PyTorch 4.0](https://pytorch.org/) with GPU support
 
 ## Data
 We use two publicly available real-world HIN datasets: DBLP and YAGO. We provide processed data links to reproduce our results. 
@@ -16,28 +16,16 @@ We use two publicly available real-world HIN datasets: DBLP and YAGO. We provide
 The hyperparameters for HEER are network name, epoch number, operator, edge mapping function and specified GPU ID. Please unzip the datasets into input_data/, unzip pretrained embeddings into intermediate_data/
 ### Example Usage
 ```
-$ bash ./src/run.sh $network $epoch $op $mode $more_param $gpu $dump_timer
+$ bash ./src/run.sh $network $epoch
 ```
 ### Default Run & Parameters
-Run HEER training on the YAGO dataset, knock out rate is 0.4
+Run HEER training on the YAGO dataset for 61 epochs, knock out rate is 0.4
 ```
-$ bash ./src/run.sh yago_ko_0.4 61 1 0 rescale_0.1_lr_10_lrr_10 0 6
+$ ./src/run.sh yago_ko_0.4 61
 ```
 
 ## Evaluation
 Run HEER evaluation on the YAGO dataset, knock out rate is 0.4. Micro-MRR, Macro-MRR and MRR for each specific edge type can be found in evaluation result files under output/
 ```
-$ bash ./src/eval.sh yago_ko_0.4 61 1 0 rescale_0.1_lr_10_lrr_10 0 6
+$ ./src/eval.sh yago_ko_0.4 61
 ```
-## parameter specifications
-operator:
-
-	1. hadamard product
-	2. outer-product
-	3. deduction
-	4. addition
-	
-mapping function:
-
-	-1. unimetric
-	0. linear mappng(HEER)
