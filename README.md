@@ -27,7 +27,7 @@ $ ./src/run.sh yago_ko_0.4 61
 ```
 
 ## Evaluation
-Run HEER evaluation on the YAGO dataset, knock out rate is 0.4. Micro-MRR, Macro-MRR and MRR for each specific edge type can be found in evaluation result files under output/
+Similar with training, here we show how to evaluate HEER on the YAGO dataset, knock out rate is 0.4. Micro-MRR, Macro-MRR and MRR for each specific edge type can be found in evaluation result files under output/. 
 ```
 $ ./src/eval.sh yago_ko_0.4 61
 ```
