@@ -15,7 +15,7 @@ We use two publicly available real-world HIN datasets: DBLP and YAGO. We provide
 * **YAGO** ([Suchanek et al., 2007](https://suchanek.name/work/publications/www2007.pdf)): YAGO is a large-scale knowledge graph derived from Wikipedia, WordNet, and GeoNames. There are seven types of nodes in the network: person, location, organization, piece of work, prize, position, and event. A total of 24 edge types exist in the network, with five being directed and others being undirected. [[download](https://s3.us-east-2.amazonaws.com/heer-data/yago.zip)] [[pretrained LINE embeddings](https://s3.us-east-2.amazonaws.com/heer-data/pretrained_yago_emb.zip)]
 
 ## Train HEER
-The hyperparameters for HEER are network name and epoch number. Regarding our proposed edge reconstruction task, the $network is formatted as *$data-name*\_*ko*\_*$ko-rate*, e.g. yago_ko_0.4. You can find both DBLP and YAGO datasets with knock out rate from 0.1 to 0.9 in above link.
+The hyperparameters for HEER are network name and epoch number. Regarding our proposed edge reconstruction task, the $network is formatted as *"$data-name"*\_*ko*\_*"$ko-rate"*, e.g. yago_ko_0.4. You can find both DBLP and YAGO datasets with knock out rate from 0.1 to 0.9 in above link.
 ### Example Usage
 ```
 $ ./src/run.sh $network $epoch
