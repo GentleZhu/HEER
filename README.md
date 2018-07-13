@@ -41,7 +41,7 @@ We also provide tools to generate train and test data from any HINs. You can fin
   
 The first line describes left and right node types of a specific edge types, in which you need to index them in the node type list. The second line is the node type list. The third and fourth line describes edge types and directions. For example, `<created>:u` means `created` is an un-directed relation. Moreover, the first `0` in the fourth line indicates it is un-directed as well.
 
-You can create your own train and evaluation file using, please refer [preprocessing/ (https://github.com/GentleZhu/HEER/blob/master/preprocessing/Readme.md) for more details:
+You can create your own train and evaluation file using, please refer [preprocessing/](https://github.com/GentleZhu/HEER/blob/master/preprocessing/Readme.md) for more details:
 ```
 $ python ./preprocessing/ko_hin.py --input-hin-file your-data --data-set-name preferred-network-name --path-output output-path --ko-rate 0.x
 ```
