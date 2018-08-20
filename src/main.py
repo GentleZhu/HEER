@@ -10,8 +10,6 @@ import torch.utils.data as tdata
 
 global config
 
-DBLP_types = [(1,0),(1,1),(1,2),(1,3),(1,4)]
-DBLP_nodes = ['A','P','Y','W','V']
 def parse_args():
 	'''
 	Parses the heer arguments.
@@ -83,7 +81,7 @@ def learn_embeddings():
 	'''
 	Learn embeddings by optimizing the Skipgram objective using SGD.
 	'''
-	print(config)
+	print('Network Spec:',config)
 
 	# flexible param interface for tuning
 	more_param = args.more_param  # everything separated by underscore, e.g., rescale_0.1_lr_0.02

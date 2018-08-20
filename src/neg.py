@@ -138,10 +138,7 @@ class NEG_loss(nn.Module):
             reg_loss = 0.0
             type_u = self.edge_types[tp][0]
             type_v = self.edge_types[tp][1]
-            #print(input_labels[t.LongTensor(np.where(types == t)),1])
-            #indices = np.where(types == tp)[0]
-            indices = t.nonzero(types == tp).squeeze()
-            #print(indices)
+            indices = t.nonzero(types == tp).squeeze().view(-1)
             if len(indices) == 0:
                 continue
             sub_batch_size = indices.size()[0]
