@@ -155,8 +155,8 @@ if __name__ == '__main__':
 					#else:
 						#print(line)
 					#	continue
-				if num_unseen_cases > 0:
-					print("WARNING: " + str(num_unseen_cases) + " unseen cases exist in in_mapping, which are predicted to be 0.5.")
+				#if num_unseen_cases > 0:
+				#	print("WARNING: " + str(num_unseen_cases) + " unseen cases exist in in_mapping, which are predicted to be 0.5.")
 
 
 			if len(_input) == 0:
