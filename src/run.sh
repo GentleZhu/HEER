@@ -31,12 +31,12 @@ SUFFIX=_input.p
 
 echo ${green}===Constructing Training Net===${reset}
 if [ ! -e  "$root_dir"/intermediate_data/"$network$SUFFIX" ]; then
-	#python main.py --input=/shared/data/yushi2/edge_rep_codes/input_data/yago_no_gender_0.4_out.net --build-graph=True --graph-name=$GRAPH_NAME --data-dir=$DATA_DIR
-	python ./src/main.py --input="$root_dir"/input_data/"$network".hin --build-graph=True \
+	#python2 main.py --input=/shared/data/yushi2/edge_rep_codes/input_data/yago_no_gender_0.4_out.net --build-graph=True --graph-name=$GRAPH_NAME --data-dir=$DATA_DIR
+	python2 ./src/main.py --input="$root_dir"/input_data/"$network".hin --build-graph=True \
 		--graph-name=$network --data-dir="$root_dir"/intermediate_data/
 fi
 echo ${red}===HEER Training===${reset}
-python ./src/main.py --iter=$2 --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/intermediate_data/model/ \
+python2 ./src/main.py --iter=$2 --batch-size=128 --dimensions=128  --graph-name=$network --data-dir="$root_dir"/intermediate_data/ --model-dir="$root_dir"/intermediate_data/model/ \
 --dump-timer=$dump_timer --map_func=$map --op=$operator --gpu=$gpu --more-param="$more_param" --log-dir="$root_dir"/log/ \
 --pre-train-path="$root_dir"/intermediate_data/pretrained_"$network".emb --fine-tune=0
 
