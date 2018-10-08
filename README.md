@@ -19,7 +19,7 @@ You will need to download zipped data and pretrained embedding via above links.
 ```
 $ make
 ```
-Please place unzipped pretrained embeddings under folder intermediate/ and network files under input_data/.
+Please place unzipped pretrained embeddings under folder intermediate_data/ and network files under input_data/.
 
 ## Train HEER
 The hyperparameters for HEER are network name and epoch number. Regarding our proposed edge reconstruction task, the $network is formatted as *"$data-name"*\_*ko*\_*"$ko-rate"*, e.g. yago_ko_0.4. You can find both DBLP and YAGO datasets with knock out rate from 0.1 to 0.9 in above link.
