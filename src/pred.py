@@ -66,6 +66,14 @@ def parse_args():
 
 	return parser.parse_args()
 
+def load_mapping(input_file):
+	id2name = dict()
+	with open(input_file) as IN:
+		for line in IN:
+			tmp = line.strip().split('\t')
+			id2name[int(tmp[1])] = tmp[0]
+	return id2name
+
 if __name__ == '__main__':
 	args = parse_args()
 	arg = {}
@@ -84,6 +92,8 @@ if __name__ == '__main__':
 	
 
 	type_offset = cPickle.load(open(args.data_dir + args.graph_name + '_offset.p'))
+	in_mapping = cPickle.load(open(args.data_dir + args.graph_name + '_in_mapping.p'))
+	out_mapping = cPickle.load(open(args.data_dir + args.graph_name + '_out_mapping.p'))
 	model = neg.NEG_loss(type_offset=type_offset, node_types=config['nodes'], edge_types=config['edges'], 
 		embed_size=args.dimensions, pre_train_path=_data, graph_name=args.graph_name, 
 		mode=args.op, map_mode=args.map_func)
@@ -101,90 +111,33 @@ if __name__ == '__main__':
 		print('model path:',model_path)
 		xxx = t.load(model_path, map_location=lambda storage, loc: storage)
 		model.load_state_dict(xxx, False )
-		model.cuda()
-	model.eval()
-	#if args.map_func == 1:
-	#	model.map_mode = 0
-		#print(model.parameters())
-
-	#model.load_state_dict(t.load('/shared/data/qiz3/data/model/' +  args.model_name +'.pt'))
-	#print(model.in_embed.weight.sum())
-	#print(model.in_embed.weight[1000].data.cpu().numpy().tolist())
-	#for el in model.edge_mapping:
-	#	print(el, el.weight.data.cpu().numpy().tolist())
-	#print(model.)
-	for el in model.edge_mapping_bn:
-		print(el, el.weight.data.cpu().numpy().tolist())
-	
-	#sys.exit(-1)
-	
-	print("Model Mode:", args.op)
-	#pred_types = [0, 1, 2, 3, 4]
-	suffix = '_' + args.graph_name + ('_eval_fast.txt' if args.fast == 1 else '_eval.txt')
-
-	in_mapping = cPickle.load(open(args.data_dir + args.graph_name +'_in_mapping.p'))
-	for idx, i in enumerate(config['types']):
-		edge_prefix = []
-		edge_prefix += (i, i+'-1')
-		#print("Edge Type:", idx)
-		#print(edge_prefix)
-	
-	#for el in model.edge_mapping:
-	#	print(el, el.weight.data.cpu().numpy().tolist())
-	#sys.exit(-1)
-
-		tp = idx
-	#APYWV
-		for prefix in edge_prefix:
-			input_eval_file = args.test_dir + prefix + suffix
-			with open(args.test_dir + prefix + suffix, 'r') as INPUT:
-				_input = []
-				_output = []
-				for line in INPUT:
-					node = line.strip().split(' ')
-					_type_a, _id_a = node[0].split(':')
-					_type_b, _id_b = node[1].split(':')
-					#print(_type_a, _id_a)
-					#if _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]:
-					if config['edges'][idx][2] == 1 and '-1' in prefix:
-						_output.append(in_mapping[_type_a][_id_a] + type_offset[_type_a])
-						_input.append(in_mapping[_type_b][_id_b] + type_offset[_type_b])
-					else:
-						_input.append(in_mapping[_type_a][_id_a] + type_offset[_type_a])
-						_output.append(in_mapping[_type_b][_id_b] + type_offset[_type_b])
-					#else:
-						#print(line)
-					#	continue
-				#if num_unseen_cases > 0:
-				#	print("WARNING: " + str(num_unseen_cases) + " unseen cases exist in in_mapping, which are predicted to be 0.5.")
+		out_emb = model.output_embeddings()
+		
+		offset,prev_offset = 0,0
+		print(type_offset)
+		with open(args.data_dir + 'heer_' + args.graph_name + '_' + str(args.iter) + '_op_' + str(args.op) + \
+				'_mode_' + str(args.map_func)+ '_' + args.more_param + '.emb', 'w') as OUT:
+			num_nodes, num_dim = out_emb.shape
+			OUT.write(str(num_nodes)+' '+str(num_dim)+'\n')
+			config['nodes'].append('sum')
+			for idx,t in enumerate(config['nodes']):
+				if t == 'sum':
+					break
+				tp = config['nodes'][idx+1]
+				while offset < type_offset[tp]:
+					OUT.write("{}:{} {}\n".format(t, out_mapping[t][offset-prev_offset], ' '.join(map(str,out_emb[offset].tolist())) ))
+					offset += 1
+				prev_offset = type_offset[tp]
+				#	out_mapping[]
+            #type_offset[tp]
 
 
-			if len(_input) == 0:
-				print("no this type! in test")
-				continue
-			input_data = tdata.TensorDataset(t.LongTensor(_input), t.LongTensor(_output))
-			#print(len(input_data))
-			
-			data_reader = tdata.DataLoader(input_data, args.batch_size, shuffle=False)
-			score = []
-			#model = neg.NEG_loss(type_offset=type_offset, node_types=args.node_types, edge_types=args.edge_types, embed_size=arg['emb_size'], pre_train_path=arg['pre_train'], graph_name=arg['graph_name'])
-			#pbar = tqdm(total=len(data_reader) / args.batch_size)
-			for i, data in enumerate(data_reader, 0):
-				inputs, labels = data
-				loss = model.predict(inputs, labels, tp)
-				score += loss
-				#pbar.update(1)
-			#pbar.close()
 
-			with open(args.test_dir + prefix + suffix, 'r') as INPUT, open(args.test_dir + prefix + suffix.replace('eval', 'pred'), 'w') as OUTPUT:
-				num_unseen_cases = 0
-				for i, line in enumerate(INPUT):
-					node = line.strip().split(' ')
-					_type_a, _id_a = node[0].split(':')
-					_type_b, _id_b = node[1].split(':')
-					assert _id_a in in_mapping[_type_a] and _id_b in in_mapping[_type_b]
-					node[2] = str(score[i])
-					OUTPUT.write(' '.join(node) + '\n')
-				#assert cnt == len(score)
-			
-
+		#print(type_offset['D'])
+		#print("{} {}".format(len(in_mapping['D'])+len(in_mapping['P']), 100))
+		#id2name = load_mapping('/shared/data/qiz3/text_summ/intermediate_data/nyt13_10k_9_25_kb.node')
+		#for i in range(type_offset['D'], type_offset['D'] + len(in_mapping['D'])):
+		#	print("{} {}".format(id2name[int(out_mapping['D'][i - type_offset['D']])], ' '.join(map(str,out_emb[i].tolist())) ))
+			#break
+		#for i in range(type_offset['P'], type_offset['P'] + len(in_mapping['P'])):
+		#	print("{} {}".format(id2name[int(out_mapping['P'][i - type_offset['P']])], ' '.join(map(str,out_emb[i].tolist())) ))
